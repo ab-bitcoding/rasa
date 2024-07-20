@@ -1,0 +1,27 @@
+version: "3.1"
+
+stories:
+- story: Greet
+  steps:
+    - intent: greet
+    - action: action_greet_user
+
+- story: Select Language
+  steps:
+    - intent: select_language
+    - action: action_select_language
+
+- story: Select Main Menu
+  steps:
+    - intent: select_menu_item
+    - action: action_menu_list
+
+- story: Emergency Support
+  steps:
+    - intent: emergency_support
+    - action: action_emergency_support
+
+- story: Renew Policy
+  steps:
+    - intent: renew_policy
+    - action: action_renew_policy
