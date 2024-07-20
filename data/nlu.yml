@@ -75,4 +75,14 @@ nlu:
       - Renew Policy
       - I need help in Renew Policy
 
+- intent: provide_pincode
+  examples: |
+    - My pincode is 123456
+    - It's 654321
+    - 789012 is the pincode
+    - The pincode is 345678
+    - 567890
+    - Pincode 890123
+    - 234567
+    - 123456
 

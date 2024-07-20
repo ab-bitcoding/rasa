@@ -10,7 +10,7 @@ intents:
 
 entities:
   - language
-
+  - pincode
 slots:
   language:
     type: text
@@ -18,6 +18,17 @@ slots:
     mappings:
       - type: from_entity
         entity: language
+  pincode:
+    type: any
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: pincode
+
+forms:
+  pincode_form:
+    required_slots:
+    - pincode
 
 responses:
   utter_greet:
@@ -35,6 +46,7 @@ actions:
   - action_menu_list
   - action_emergency_support
   - action_renew_policy
+  - validate_pincode_form
 
 session_config:
   session_expiration_time: 60

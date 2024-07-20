@@ -6,3 +6,9 @@ rules:
   steps:
   - intent: goodbye
   - action: utter_goodbye
+
+- rule: Activate form
+  steps:
+  - intent: provide_pincode
+  - action: pincode_form
+  - active_loop: pincode_form
