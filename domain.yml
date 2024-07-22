@@ -4,13 +4,18 @@ intents:
   - greet
   - select_language
   - select_menu_item
-  - emergency_support
   - renew_policy
+  - emergency_support
+  - near_by_workshop
+  - ask_emergency_pincode
+  - ask_near_by_workshop_pincode
   - goodbye
 
 entities:
   - language
-  - pincode
+  - emergency_pincode
+  - near_by_workshop_pincode
+
 slots:
   language:
     type: text
@@ -18,17 +23,30 @@ slots:
     mappings:
       - type: from_entity
         entity: language
-  pincode:
-    type: any
+  emergency_pincode:
+    type: text
     influence_conversation: true
     mappings:
-      - type: from_entity
-        entity: pincode
+    - type: from_text
+      conditions:
+          - active_loop: emergency_pincode_form
+            requested_slot: emergency_pincode
+  near_by_workshop_pincode:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_text
+      conditions:
+          - active_loop: near_by_workshop_pincode_form
+            requested_slot: near_by_workshop_pincode
 
 forms:
-  pincode_form:
+  emergency_pincode_form:
     required_slots:
-    - pincode
+      - emergency_pincode
+  near_by_workshop_pincode_form:
+    required_slots:
+      - near_by_workshop_pincode
 
 responses:
   utter_greet:
@@ -44,9 +62,14 @@ actions:
   - action_greet_user
   - action_select_language
   - action_menu_list
-  - action_emergency_support
   - action_renew_policy
-  - validate_pincode_form
+  - action_near_by_workshop
+  - action_emergency_support
+  - validate_emergency_pincode_form
+  - action_emergency_submit_form
+  - validate_near_by_workshop_pincode
+  - action_near_by_workshop_submit_form
+
 
 session_config:
   session_expiration_time: 60

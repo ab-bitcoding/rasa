@@ -7,8 +7,30 @@ rules:
   - intent: goodbye
   - action: utter_goodbye
 
-- rule: Activate form
+- rule: Activate Emergency Pincode Form
   steps:
-  - intent: provide_pincode
-  - action: pincode_form
-  - active_loop: pincode_form
+    - intent: ask_emergency_pincode
+    - action: emergency_pincode_form
+    - active_loop: emergency_pincode_form
+
+- rule: Submit Emergency Pincode Form
+  condition:
+    - active_loop: emergency_pincode_form
+  steps:
+    - action: emergency_pincode_form
+    - active_loop: null
+    - action: action_emergency_submit_form
+
+- rule: Activat Near By Workshop Pincode Form
+  steps:
+    - intent: ask_near_by_workshop_pincode
+    - action: near_by_workshop_pincode_form
+    - active_loop: near_by_workshop_pincode_form
+
+- rule: Submit Near By Workshop Pincode Form
+  condition:
+    - active_loop: near_by_workshop_pincode_form
+  steps:
+    - action: near_by_workshop_pincode_form
+    - active_loop: null
+    - action: action_near_by_workshop_submit_form

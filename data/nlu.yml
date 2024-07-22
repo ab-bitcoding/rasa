@@ -67,22 +67,40 @@ nlu:
     - Emergency support
     - I need help urgently
 
+- intent: ask_emergency_pincode
+  examples: |
+    - What is your pincode?
+    - Can You provide pincode?
+    - Tell me pincode
+    - What's your pincode?
+    - pincode?
+
+- intent: near_by_workshop
+  examples: |
+    - What is your location
+    - location
+    - what is near locatoin
+    - What is near my location?
+    - Find a workshop near me.
+    - I need a workshop nearby.
+
+- intent: ask_near_by_workshop_pincode
+  examples: |
+    - Can you find a workshop near me with the pincode?
+    - I need a workshop near the pincode
+    - Show me workshops near the pincode
+    - Are there any workshops near?
+    - Workshops near pincode, please
+    - Where can I find a workshop near pincode?
+    - Find workshops with the pincode
+    - Any workshops around?
+    - Workshops close to?
+    - Workshops in the area of pincode
+
 - intent: renew_policy
   examples: |
-      - I need Renew Policy
-      - Call for Renew Policy help
-      - Renew Policy required
-      - Renew Policy
-      - I need help in Renew Policy
-
-- intent: provide_pincode
-  examples: |
-    - My pincode is 123456
-    - It's 654321
-    - 789012 is the pincode
-    - The pincode is 345678
-    - 567890
-    - Pincode 890123
-    - 234567
-    - 123456
-
+    - I need Renew Policy
+    - Call for Renew Policy help
+    - Renew Policy required
+    - Renew Policy
+    - I need help in Renew Policy
