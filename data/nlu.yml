@@ -67,13 +67,6 @@ nlu:
     - Emergency support
     - I need help urgently
 
-- intent: ask_emergency_pincode
-  examples: |
-    - What is your pincode?
-    - Can You provide pincode?
-    - Tell me pincode
-    - What's your pincode?
-    - pincode?
 
 - intent: near_by_workshop
   examples: |
@@ -83,19 +76,6 @@ nlu:
     - What is near my location?
     - Find a workshop near me.
     - I need a workshop nearby.
-
-- intent: ask_near_by_workshop_pincode
-  examples: |
-    - Can you find a workshop near me with the pincode?
-    - I need a workshop near the pincode
-    - Show me workshops near the pincode
-    - Are there any workshops near?
-    - Workshops near pincode, please
-    - Where can I find a workshop near pincode?
-    - Find workshops with the pincode
-    - Any workshops around?
-    - Workshops close to?
-    - Workshops in the area of pincode
 
 - intent: renew_policy
   examples: |

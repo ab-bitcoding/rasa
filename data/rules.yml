@@ -7,23 +7,27 @@ rules:
   - intent: goodbye
   - action: utter_goodbye
 
-- rule: Activate Emergency Pincode Form
+- rule: Activate Emergency Pincode form
   steps:
-    - intent: ask_emergency_pincode
-    - action: emergency_pincode_form
-    - active_loop: emergency_pincode_form
+  - intent: emergency_support
+  - action: action_emergency_support
+  - action: emergency_support_pincode_form
+  - active_loop: emergency_support_pincode_form
 
-- rule: Submit Emergency Pincode Form
+- rule: Submit Emergency Pincode form
   condition:
-    - active_loop: emergency_pincode_form
+  - active_loop: emergency_support_pincode_form
   steps:
-    - action: emergency_pincode_form
-    - active_loop: null
-    - action: action_emergency_submit_form
+  - action: emergency_support_pincode_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_submit_emergency_support_pincode_form
 
 - rule: Activat Near By Workshop Pincode Form
   steps:
-    - intent: ask_near_by_workshop_pincode
+    - intent: near_by_workshop
+    - action: action_near_by_workshop
     - action: near_by_workshop_pincode_form
     - active_loop: near_by_workshop_pincode_form
 
@@ -33,4 +37,6 @@ rules:
   steps:
     - action: near_by_workshop_pincode_form
     - active_loop: null
-    - action: action_near_by_workshop_submit_form
+    - slot_was_set:
+      - requested_slot: null
+    - action: action_submit_near_by_workshop_pincode_form

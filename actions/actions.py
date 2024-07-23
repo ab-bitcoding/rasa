@@ -4,6 +4,8 @@ from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet, FollowupAction
 from rasa_sdk.types import DomainDict
+
+
 class ActionGreetUser(Action):
 
     def name(self) -> Text:
@@ -92,6 +94,7 @@ class ActionMenuList(Action):
 
             return []
 
+
 class ActionEmergencySupport(Action):
     def name(self) -> Text:
         return "action_emergency_support"
@@ -114,7 +117,10 @@ class ActionEmergencySupport(Action):
                 """
             )
             dispatcher.utter_message(text=message)
-            return []
+            return [
+                # FollowupAction("emergency_pincode_form")
+            ]
+
 
 class ActionNearByWorkshop(Action):
     def name(self) -> Text:
@@ -128,9 +134,10 @@ class ActionNearByWorkshop(Action):
 
             Please enter the Pincode or share your current location.
         """)
-        
+
         dispatcher.utter_message(text=message)
         return []
+
 
 class ActionRenewPolicy(Action):
     def name(self) -> Text:
@@ -149,34 +156,43 @@ class ActionRenewPolicy(Action):
             dispatcher.utter_message(text=message)
             return []
 
-class ValidationPincodeForm(FormValidationAction):
-    def name(self) -> Text:
-        return "validate_emergency_pincode_form"
 
-    def emergency_pincode_form(
+class ValidateEmergencySupportPincodeForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_emergency_support_pincode_form"
+
+    def validate_pincode(
         self,
         slot_value: Any,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
         domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
-        emergency_pincode = tracker.get_slot("emergency_pincode")       
-        if len(emergency_pincode) == 6:
-            return [SlotSet("emergency_pincode", emergency_pincode)]
+        print("Emergency Validation Function Running")
+        emergency_pincode = str(slot_value)
+        print(f"emergency_pincode: {emergency_pincode}")
+        if len(emergency_pincode) == 6 and emergency_pincode.isdigit():
+            return {"pincode": emergency_pincode}
         else:
-            dispatcher.utter_message(text="Please enter a valid 6-digit pincode.")
-            return [SlotSet("emergency_pincode", None)]
+            message = ("""
+                Looks like the location is invalid.
 
-class ActionEmergencySubmitForm(Action):
+                Please enter the pincode or share your current location 
+            """)
+            dispatcher.utter_message(text=message)
+            return {"pincode": None}
+
+class ActionSubmitEmergencyPincodeForm(Action):
     def name(self) -> Text:
-        return "action_emergency_submit_form"
+        return "action_submit_emergency_support_pincode_form"
 
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: "DomainDict") -> List[Dict[Text, Any]]:
-        emergency_pincode = tracker.get_slot("emergency_pincode")
-        if len(emergency_pincode) == 6:
-            messages = ("""
+        emergency_pincode = tracker.get_slot("pincode")
+        print("emergency_pincode::::",emergency_pincode)
+        if emergency_pincode:
+            message = ("""
                 Great! We found 1 Garages near you. Given below are the details of workshops:
 
                 Superon
@@ -198,43 +214,53 @@ class ActionEmergencySubmitForm(Action):
             buttons = [
                 {"title": "Main Menu", "payload": '/select_menu_item'}
             ]
-            dispatcher.utter_message(text=messages,buttons=buttons)
-            return [SlotSet("emergency_pincode", None)]
-        # else:
-        #     dispatcher.utter_message(text="Enter Valid Pincode Number")
-        #     return []
+            dispatcher.utter_message(text=message, buttons=buttons)
+        else:
+            message = ("""
+                Looks like the location is invalid.
 
-class ValidationNearByWorkshopPincode(FormValidationAction):
+                Please enter the pincode or share your current location 
+            """)
+            dispatcher.utter_message(text=message)
+
+        return [SlotSet("pincode", None)]
+
+
+class ValidaeNearByWorkshopPincodeForm(FormValidationAction):
     def name(self) -> Text:
-        return "validate_near_by_workshop_pincode"
+        return "validate_near_by_workshop_pincode_form"
     
-    def near_by_workshop_pincode(
+    def validate_pincode(
             self,
+            slot_value:Any,
             dispatcher: CollectingDispatcher,
             tracker:Tracker,
             domain:Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        near_by_workshop_pincode_value = tracker.get_slot("near_by_workshop_pincode")
+        near_by_workshop_pincode_value = str(slot_value)
 
-        if len(near_by_workshop_pincode_value) == 6:
-            print("Validation near_by_workshop_pincode_value",near_by_workshop_pincode_value)
-            return [SlotSet["near_by_workshop_pincode", near_by_workshop_pincode_value]]
+        if len(near_by_workshop_pincode_value) == 6 and near_by_workshop_pincode_value.isdigit():
+            return {"pincode": near_by_workshop_pincode_value}
         else:
-            dispatcher.utter_message(text="Please enter a valid 6-digit pincode.")
-            return [SlotSet("near_by_workshop_pincode", None)]
+            message = ("""
+                Looks like the location is invalid.
+
+                Please enter the pincode or share your current location 
+            """)
+            dispatcher.utter_message(text=message)
+            return {"pincode": None}
 
 
-class ActionEmergencySubmitForm(Action):
+class ActionSubmitNearByWorkshopPincodeForm(Action):
     def name(self) -> Text:
-        return "action_near_by_workshop_submit_form"
+        return "action_submit_near_by_workshop_pincode_form"
     
     def run(
             self,
             dispatcher:CollectingDispatcher,
             tracker:Tracker,
             domain: "DomainDict") -> List[Dict[Text, Any]]:
-        near_by_workshop_pincode = tracker.get_slot("near_by_workshop_pincode")
-        print("near_by_workshop_pincode::::::::", near_by_workshop_pincode)
-        if len(near_by_workshop_pincode) == 6:
+        near_by_workshop_pincode = tracker.get_slot("pincode")
+        if near_by_workshop_pincode:
             message = ("""
                 Great! We found 1 Garages near you. Given below are the details of workshops:
 
@@ -254,8 +280,10 @@ class ActionEmergencySubmitForm(Action):
                 Missed call and get callback:
                 9876543211
             """)
-            dispatcher.utter_message(text=message)
-            return [SlotSet("near_by_workshop_pincode", None)]
+            buttons = [
+                {"title": "Main Menu", "payload": '/select_menu_item'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
         else:
             message = ("""
                 Looks like the location is invalid.
@@ -263,4 +291,4 @@ class ActionEmergencySubmitForm(Action):
                 Please enter the pincode or share your current location 
             """)
             dispatcher.utter_message(text=message)
-            return [SlotSet("near_by_workshop_pincode", None)]
+        return [SlotSet("pincode", None)]

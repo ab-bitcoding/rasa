@@ -16,17 +16,7 @@ stories:
     - intent: select_menu_item
     - action: action_menu_list
 
-- story: Emergency Support
-  steps:
-    - intent: emergency_support
-    - action: action_emergency_support
-
 - story: Renew Policy
   steps:
     - intent: renew_policy
     - action: action_renew_policy
-
-- story: Near By workshop Locatiom
-  steps:
-    - intent: near_by_workshop
-    - action: action_near_by_workshop
