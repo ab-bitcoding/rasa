@@ -24,7 +24,7 @@ rules:
     - requested_slot: null
   - action: action_submit_emergency_support_pincode_form
 
-- rule: Activat Near By Workshop Pincode Form
+- rule: Activate Near By Workshop Pincode Form
   steps:
     - intent: near_by_workshop
     - action: action_near_by_workshop
@@ -40,3 +40,20 @@ rules:
     - slot_was_set:
       - requested_slot: null
     - action: action_submit_near_by_workshop_pincode_form
+
+- rule:  Activate Health Policy form
+  steps:
+    - intent: health_policy
+    - action: action_health_policy
+    - action: health_policy_form
+    - active_loop: health_policy_form
+
+- rule: Submit Health Policy form
+  condition:
+    - active_loop: health_policy_form
+  steps:
+    - action: health_policy_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - action: action_submit_health_policy_form

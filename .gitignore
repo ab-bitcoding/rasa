@@ -6,7 +6,9 @@
 **/.rasa/cache
 ###  Models  ###
 models/
-
+###  Credintials  ###
+credentials.yml
+*test.yml
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

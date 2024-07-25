@@ -80,7 +80,11 @@ class ActionMenuList(Action):
             dispatcher:CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        
+            message = ("""
+                Need help with renewal, claims or any other insurance-related support.
+
+                Click on *Main Menu*
+            """)
             buttons = [
                 {"title": "Renew Policy", "payload": '/renew_policy'},
                 {"title": "Claims Related", "payload": '/claims_related'},
@@ -88,9 +92,10 @@ class ActionMenuList(Action):
                 {"title": "Emergengy Support", "payload": '/emergency_support'},
                 {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
                 {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'}
             ]
 
-            dispatcher.utter_message(buttons=buttons)
+            dispatcher.utter_message(text=message, buttons=buttons)
 
             return []
 
@@ -181,6 +186,7 @@ class ValidateEmergencySupportPincodeForm(FormValidationAction):
             """)
             dispatcher.utter_message(text=message)
             return {"pincode": None}
+
 
 class ActionSubmitEmergencyPincodeForm(Action):
     def name(self) -> Text:
@@ -292,3 +298,145 @@ class ActionSubmitNearByWorkshopPincodeForm(Action):
             """)
             dispatcher.utter_message(text=message)
         return [SlotSet("pincode", None)]
+
+
+class ActionHealthPolicy(Action):
+    def name(self) -> Text:
+        """Returns the name of the action."""
+        return "action_health_policy"
+
+    def run(self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        """Executes the action."""
+        
+        message = ("""
+            You are now in the Health Policy section.
+            Here, you will find information and updates on healthcare regulations, policies, and initiatives.
+            Explore the latest developments to stay informed and make well-informed decisions about your health and wellness.
+        """)
+        dispatcher.utter_message(text=message)
+        return []
+
+
+class ValidateHealthPolicyForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_health_policy_form"
+
+    def validate_name(self,
+                      slot_value:Any,
+                      dispatcher:CollectingDispatcher,
+                      tracker: Tracker,
+                      domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+
+        name = tracker.get_slot('name').lower()
+        print(f"This is name: {name}")
+        if name.replace(" ", "").isalpha() and len(name) > 1:
+            dispatcher.utter_message(text="Thanks! Now, could you please provide your email?")
+            return {"name": name}
+        else:
+            dispatcher.utter_message(text="Please enter a valid name.")
+            return {"name": None}
+
+    def validate_email(self,
+                       slot_value:Any,
+                      dispatcher:CollectingDispatcher,
+                      tracker: Tracker,
+                      domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+        
+
+        email = tracker.get_slot('email').strip().lower()
+        print(f"This is email: {email}")
+        if "@" in email and "." in email and len(email) > 7:
+            dispatcher.utter_message(text="Thanks! Now, could you please provide your age?")
+            return {"email": email}
+        else:
+            dispatcher.utter_message(text="Please enter a valid email address.")
+            return {"email": None}
+
+    def validate_age(self,
+                    slot_value:Any,
+                    dispatcher:CollectingDispatcher,
+                    tracker: Tracker,
+                    domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+
+        age  = tracker.get_slot('age')
+        print(f"This is age: {age}")
+        if age.isdigit() and 0 < int(age) <= 120:
+            dispatcher.utter_message(text="Thanks! Now, could you please provide your Phone Number?") 
+            return {"age": age}
+        else:
+            dispatcher.utter_message(text="Please enter a valid age")
+            return {"age": None}
+
+    def validate_phone_number(self,
+                    slot_value: Any,
+                    dispatcher:CollectingDispatcher,
+                    tracker: Tracker,
+                    domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+
+        phone_number = tracker.get_slot('phone_number')
+        print(f"This is Phone Number: {phone_number}")
+        if phone_number.isdigit() and len(phone_number) == 10:
+            dispatcher.utter_message(text="Thanks! Now, could you please provide your Income?") 
+            return {"phone_number": phone_number}
+        else:
+            dispatcher.utter_message(text="Please enter a valid phone number")
+            return {"phone_number": None}
+
+    def validate_income(self,
+                    slot_value:Any,
+                    dispatcher:CollectingDispatcher,
+                    tracker: Tracker,
+                    domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+
+        income = tracker.get_slot('income').strip()
+        print(f"This is Income: {income}")
+        try:
+            income_value = float(income)
+            if income_value > 0:
+                return {"income": income}
+            else: 
+                dispatcher.utter_message(text="Please enter a valid income")
+                return {"income": None}
+        except ValueError:
+            dispatcher.utter_message(text="Please enter a valid numeric income.")
+            return {"income": None}
+
+class ActionSubmitHealthPolicyForm(Action):
+    def name(self) -> Text:
+        return "action_submit_health_policy_form"
+    
+    def run(self,
+            dispatcher: CollectingDispatcher,
+            tracker:Tracker,
+            domain:Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        name = tracker.get_slot('name')
+        email = tracker.get_slot('email')
+        age = tracker.get_slot('age')
+        phone_number = tracker.get_slot('phone_number')
+        income = tracker.get_slot('income')
+
+        message = (f"""
+            Details of the Form:                   
+
+            Your name is {name}
+            Your email is {email}
+            Your age is {age}
+            Your Phone Number is {phone_number}
+            Your Income is {income}
+        """)
+        buttons = [
+                {"title": "Main Menu", "payload": '/select_menu_item'}
+            ]
+        dispatcher.utter_message(text=message, buttons=buttons)
+        
+        return [
+            SlotSet('name', None),
+            SlotSet('email', None),
+            SlotSet('age', None),
+            SlotSet('phone_number', None),
+            SlotSet('income', None)
+        ]
+

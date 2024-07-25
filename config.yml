@@ -6,6 +6,13 @@ recipe: default.v1
 # This default value must be replaced with a unique assistant name within your deployment
 assistant_id: 20240719-121705-aged-reverb
 
+
+# custom_whatsapp_connector.CustomWhatsAppInput:
+#  webhook_url: "http://localhost:5056/webhook"
+
+channels.whatsapp.WhatsAppInput:
+ webhook_url: "https://known-sweet-collie.ngrok-free.app/webhooks/whatsapp/webhook"
+
 # Configuration for Rasa NLU.
 # https://rasa.com/docs/rasa/nlu/components/
 language: en

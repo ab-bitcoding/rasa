@@ -7,11 +7,17 @@ intents:
   - renew_policy
   - emergency_support
   - near_by_workshop
+  - health_policy
   - goodbye
 
 entities:
   - language
   - pincode
+  - name
+  - email
+  - age
+  - phone_number
+  - income
 
 slots:
   language:
@@ -32,6 +38,52 @@ slots:
           - active_loop: near_by_workshop_pincode_form
             requested_slot: pincode
 
+  name:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: health_policy_form
+            requested_slot: name
+
+  email:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: health_policy_form
+            requested_slot: email
+
+  age:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: health_policy_form
+            requested_slot: age
+
+  phone_number:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: health_policy_form
+            requested_slot: phone_number
+
+  income:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: health_policy_form
+            requested_slot: income
+
+
 forms:
   emergency_support_pincode_form:
     required_slots:
@@ -39,6 +91,13 @@ forms:
   near_by_workshop_pincode_form:
     required_slots:
       - pincode
+  health_policy_form:
+    required_slots:
+      - name
+      - email
+      - age
+      - phone_number
+      - income
 
 responses:
   utter_greet:
@@ -50,7 +109,7 @@ responses:
   utter_goodbye:
   - text: "Bye"
 
-actions:
+actions:  
   - action_greet_user
   - action_select_language
   - action_menu_list
@@ -61,6 +120,9 @@ actions:
   - action_submit_emergency_support_pincode_form
   - validate_near_by_workshop_pincode_form
   - action_submit_near_by_workshop_pincode_form
+  - action_health_policy
+  - validate_health_policy_form
+  - action_submit_health_policy_form
 
 
 session_config:

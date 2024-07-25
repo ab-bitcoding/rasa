@@ -20,3 +20,31 @@ stories:
   steps:
     - intent: renew_policy
     - action: action_renew_policy
+
+# - story: Activate and Submit Health Policy form
+#   steps:
+#     - intent: health_policy
+#     - action: action_health_policy
+#     - action: health_policy_form
+#     - active_loop: health_policy_form
+#     - action: health_policy_form
+#     - active_loop: null
+#     - slot_was_set:
+#         - requested_slot: null
+#     - action: action_submit_health_policy_form
+
+# - story: Activate Health Policy form
+#   steps:
+#     - intent: health_policy
+#     - action: action_health_policy
+#     - action: health_policy_form
+#     - active_loop: health_policy_form
+
+# - story: Submit Health Policy form
+#   steps:
+#     - action: health_policy_form
+#     - active_loop: null
+#     - slot_was_set:
+#         - requested_slot: null
+#     - action: action_submit_health_policy_form
+#               action_submit_health_policy_form

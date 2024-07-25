@@ -84,3 +84,16 @@ nlu:
     - Renew Policy required
     - Renew Policy
     - I need help in Renew Policy
+
+- intent: health_policy
+  examples: |
+    - Tell me about health policies
+    - What are the current health policies?
+    - I want to know about healthcare regulations
+    - Show me the health policy information
+    - Give me updates on health policy
+    - Health policy details, please
+    - Can you provide information on health policies?
+    - What are the recent changes in health policies?
+    - Provide health policy updates
+    - I am interested in health policy news
