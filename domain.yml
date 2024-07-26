@@ -6,6 +6,8 @@ intents:
   - select_menu_item
   - renew_policy
   - emergency_support
+  - user_details
+  - get_all_user
   - near_by_workshop
   - health_policy
   - goodbye
@@ -107,7 +109,12 @@ responses:
   - text: "You have selected {language}."
 
   utter_goodbye:
-  - text: "Bye"
+  - text: |
+        Thank you for using our service! 😊
+        
+        If you have any more questions or need further assistance, feel free to ask.
+        
+        Have a great day!
 
 actions:  
   - action_greet_user
@@ -116,6 +123,7 @@ actions:
   - action_renew_policy
   - action_near_by_workshop
   - action_emergency_support
+  - action_user_details
   - validate_emergency_support_pincode_form
   - action_submit_emergency_support_pincode_form
   - validate_near_by_workshop_pincode_form

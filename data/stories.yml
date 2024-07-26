@@ -21,6 +21,17 @@ stories:
     - intent: renew_policy
     - action: action_renew_policy
 
+
+- story: user details flow
+  steps:
+  - intent: get_all_user
+  - action: action_user_details
+  
+# - story: User Details
+#   steps:
+#     - intent: user_details
+#     - action: action_user_details
+
 # - story: Activate and Submit Health Policy form
 #   steps:
 #     - intent: health_policy

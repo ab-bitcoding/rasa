@@ -97,3 +97,25 @@ nlu:
     - What are the recent changes in health policies?
     - Provide health policy updates
     - I am interested in health policy news
+
+- intent: user_details
+  examples: |
+    - Please provide your user details
+    - Can you give me the user details form?
+    - Fill in the user details for me
+    - I'm ready to submit my user details
+    - Let's start with the user information form
+    - fill out the user details form
+
+- intent: get_all_user
+  examples: |
+    - Show me all users
+    - I want to get all users
+    - List all users
+    - Retrieve all user details
+    - Fetch all users
+    - Can you get a list of all users?
+    - Provide all users
+    - Display all users
+    - Show all user information
+    - List out all users

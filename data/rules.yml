@@ -48,6 +48,18 @@ rules:
     - action: health_policy_form
     - active_loop: health_policy_form
 
+- rule: user details flow
+  steps:
+  - intent: get_all_user
+  - action: action_user_details
+
+- rule: User Details
+  steps:
+    - intent: user_details
+    - action: action_user_details
+    - action: health_policy_form
+    - active_loop: health_policy_form
+
 - rule: Submit Health Policy form
   condition:
     - active_loop: health_policy_form
