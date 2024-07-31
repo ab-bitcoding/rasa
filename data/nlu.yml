@@ -98,14 +98,19 @@ nlu:
     - Provide health policy updates
     - I am interested in health policy news
 
-- intent: user_details
+- intent: add_user
   examples: |
-    - Please provide your user details
-    - Can you give me the user details form?
-    - Fill in the user details for me
-    - I'm ready to submit my user details
-    - Let's start with the user information form
-    - fill out the user details form
+    - I want to add a user
+    - Add a new user
+    - Create a user
+    - Can you add a user?
+
+- intent: update_user
+  examples: |
+    - I want to update a user
+    - Update user details
+    - Modify user information
+    - Can you update a user?
 
 - intent: get_all_user
   examples: |
@@ -119,3 +124,33 @@ nlu:
     - Display all users
     - Show all user information
     - List out all users
+    - getalluser
+
+
+- intent: update_email
+  examples: |
+    - I want to change my email address
+    - Update my email
+    - I'd like to update my email address
+    - Change my email address
+    - Please change my email
+    - Can I update my email?
+    - How can I change my email address?
+    - I need to update my email
+    - My email address has changed
+    - I want to provide a new email address
+    - I need to change my registered email
+    - Modify my email address
+    - I'd like to change my email information
+    - Update the email linked to my account
+    - Please update my email address
+
+- intent: set_email
+  examples: |
+    - my email is 
+    - email is
+    - new email is 
+    - aniket@gamil.com
+    - raj@gmail.com
+    - vivek@gmail.com
+    - Modify my email 

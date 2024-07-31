@@ -21,16 +21,32 @@ stories:
     - intent: renew_policy
     - action: action_renew_policy
 
-
-- story: user details flow
+- story: User Details
   steps:
-  - intent: get_all_user
-  - action: action_user_details
+    - intent: user_details
+    - action: action_user_details
+
+- story: Get All User Details
+  steps:
+    - intent: get_all_user
+    - action: action_get_all_user
+
+- story: Update User Details
+  steps:
+    - intent: update_user
+    - action: action_update_user
+
+- story: Update your Email
+  steps:
+    - intent: update_email
+    - action: action_update_email
+    - intent: set_email
+    - action: action_set_email_form
   
-# - story: User Details
-#   steps:
-#     - intent: user_details
-#     - action: action_user_details
+- story: Confirm User Data
+  steps:
+    - intent: confirm_user
+    - action: action_confirm_user_details
 
 # - story: Activate and Submit Health Policy form
 #   steps:

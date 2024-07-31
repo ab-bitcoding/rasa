@@ -7,6 +7,12 @@ intents:
   - renew_policy
   - emergency_support
   - user_details
+  - confirm_user
+  - add_user
+  - update_user
+  - update_email
+  - set_email
+  - inform
   - get_all_user
   - near_by_workshop
   - health_policy
@@ -48,6 +54,8 @@ slots:
         conditions:
           - active_loop: health_policy_form
             requested_slot: name
+          - active_loop: user_details_form
+            requested_slot: name
 
   email:
     type: text
@@ -56,6 +64,10 @@ slots:
       - type: from_text
         conditions:
           - active_loop: health_policy_form
+            requested_slot: email
+          - active_loop: user_details_form
+            requested_slot: email
+          - active_loop: set_email_form
             requested_slot: email
 
   age:
@@ -66,6 +78,8 @@ slots:
         conditions:
           - active_loop: health_policy_form
             requested_slot: age
+          - active_loop: user_details_form
+            requested_slot: age
 
   phone_number:
     type: text
@@ -74,6 +88,8 @@ slots:
       - type: from_text
         conditions:
           - active_loop: health_policy_form
+            requested_slot: phone_number
+          - active_loop: user_details_form
             requested_slot: phone_number
 
   income:
@@ -84,15 +100,26 @@ slots:
         conditions:
           - active_loop: health_policy_form
             requested_slot: income
+          - active_loop: user_details_form
+            requested_slot: income
+
+  # user_action:
+  #   type: text
+  #   influence_conversation: true
+  #   mappings:
+  #     - type: from_entity
+  #       entity: user_action
 
 
 forms:
   emergency_support_pincode_form:
     required_slots:
       - pincode
+
   near_by_workshop_pincode_form:
     required_slots:
       - pincode
+
   health_policy_form:
     required_slots:
       - name
@@ -100,6 +127,17 @@ forms:
       - age
       - phone_number
       - income
+
+  user_details_form:
+    required_slots:
+      - name
+      - email
+      - age
+      - phone_number
+      - income
+  set_email_form:
+    required_slots:
+      - email
 
 responses:
   utter_greet:
@@ -109,12 +147,7 @@ responses:
   - text: "You have selected {language}."
 
   utter_goodbye:
-  - text: |
-        Thank you for using our service! 😊
-        
-        If you have any more questions or need further assistance, feel free to ask.
-        
-        Have a great day!
+  - text: "Thank you for using our service! 😊 \n \n If you have any more questions or need further assistance, feel free to ask. \n \n Have a great day!"
 
 actions:  
   - action_greet_user
@@ -123,14 +156,26 @@ actions:
   - action_renew_policy
   - action_near_by_workshop
   - action_emergency_support
+  - action_health_policy
   - action_user_details
   - validate_emergency_support_pincode_form
-  - action_submit_emergency_support_pincode_form
   - validate_near_by_workshop_pincode_form
-  - action_submit_near_by_workshop_pincode_form
-  - action_health_policy
   - validate_health_policy_form
+  - validate_user_details_form
+  - action_submit_emergency_support_pincode_form
+  - action_submit_near_by_workshop_pincode_form
   - action_submit_health_policy_form
+  - action_submit_user_details_form
+  - action_get_all_user
+  - action_add_user
+  - action_update_user
+  - action_confirm_user_details
+  # - action_field_update_email
+  - action_update_email
+  - action_set_email_form
+  - action_submit_set_email_form
+
+
 
 
 session_config:

@@ -48,18 +48,6 @@ rules:
     - action: health_policy_form
     - active_loop: health_policy_form
 
-- rule: user details flow
-  steps:
-  - intent: get_all_user
-  - action: action_user_details
-
-- rule: User Details
-  steps:
-    - intent: user_details
-    - action: action_user_details
-    - action: health_policy_form
-    - active_loop: health_policy_form
-
 - rule: Submit Health Policy form
   condition:
     - active_loop: health_policy_form
@@ -69,3 +57,38 @@ rules:
     - slot_was_set:
       - requested_slot: null
     - action: action_submit_health_policy_form
+
+- rule: Activate Add User Details form
+  steps:
+    - intent: add_user
+    - action: action_add_user
+    - action: user_details_form
+    - active_loop: user_details_form
+
+- rule: Submit User Details form
+  condition:
+    - active_loop: user_details_form
+  steps:
+    - action: user_details_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - action: action_submit_user_details_form
+
+
+# - rule: Activate Set Email form
+#   steps:
+#     - intent: set_email
+#     # - action: action_update_email
+#     - action: action_set_email
+#     - active_loop: set_email_form
+
+# - rule: Submit Email form
+#   condition:
+#     - active_loop: set_email_form
+#   steps:
+#     - action: set_email_form
+#     - active_loop: null
+#     - slot_was_set:
+#       - requested_slot: null
+#     - action: action_submit_set_email_form

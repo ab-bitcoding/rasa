@@ -1,7 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
-from typing import Dict
+from typing import Any, Dict, List, Text
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -25,7 +25,7 @@ def create_user(payload: Dict[str, any]) -> Dict[str, any]:
     if not API_BASE_URL:
         raise ValueError("API_BASE_URL environment variable is not set.")
     
-    url = f"{API_BASE_URL}/user/"
+    url = f"{API_BASE_URL}/user"
 
     try:
         response = requests.post(url, json=payload)
@@ -33,3 +33,32 @@ def create_user(payload: Dict[str, any]) -> Dict[str, any]:
         return response.json()
     except requests.exceptions.RequestException as e:
         raise Exception(f"Failed to submit form: {str(e)}")
+
+
+def fetch_all_user_data() -> Dict[Text, Any]:
+
+    if not API_BASE_URL:
+        raise ValueError("API_BASE_URL environment variable is not set.")
+    
+    url = f"{API_BASE_URL}/all_users"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return []
+
+def fetch_user_data(phone_number: str) -> Dict[str, Any]:
+    url = f"http://127.0.0.1:8000/v1/user/{phone_number}"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Error fetching data: {response.status_code}")
+            return {}
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed: {e}")
+        return {}
+    
+def update_user_data():
+    pass
