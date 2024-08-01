@@ -41,7 +41,6 @@ nlu:
     - pick your language
     - set language
 
-
 - intent: select_menu_item
   examples: |
     - I want to choose a menu item
@@ -58,7 +57,6 @@ nlu:
     - let me choose a menu item
     - let me pick a menu item
 
-
 - intent: emergency_support
   examples: |
     - I need emergency support
@@ -66,7 +64,6 @@ nlu:
     - Urgent assistance required
     - Emergency support
     - I need help urgently
-
 
 - intent: near_by_workshop
   examples: |
@@ -105,7 +102,7 @@ nlu:
     - Create a user
     - Can you add a user?
 
-- intent: update_user
+- intent: update_user_details
   examples: |
     - I want to update a user
     - Update user details
@@ -126,8 +123,7 @@ nlu:
     - List out all users
     - getalluser
 
-
-- intent: update_email
+- intent: update_email_details
   examples: |
     - I want to change my email address
     - Update my email
@@ -144,13 +140,3 @@ nlu:
     - I'd like to change my email information
     - Update the email linked to my account
     - Please update my email address
-
-- intent: set_email
-  examples: |
-    - my email is 
-    - email is
-    - new email is 
-    - aniket@gamil.com
-    - raj@gmail.com
-    - vivek@gmail.com
-    - Modify my email 

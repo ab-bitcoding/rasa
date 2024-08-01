@@ -75,20 +75,19 @@ rules:
       - requested_slot: null
     - action: action_submit_user_details_form
 
+- rule: Activate Update Email form
+  steps:
+    - intent: update_email_details
+    - action: action_update_email_details
+    - action: update_email_details_form
+    - active_loop: update_email_details_form
 
-# - rule: Activate Set Email form
-#   steps:
-#     - intent: set_email
-#     # - action: action_update_email
-#     - action: action_set_email
-#     - active_loop: set_email_form
-
-# - rule: Submit Email form
-#   condition:
-#     - active_loop: set_email_form
-#   steps:
-#     - action: set_email_form
-#     - active_loop: null
-#     - slot_was_set:
-#       - requested_slot: null
-#     - action: action_submit_set_email_form
+- rule: Submit Update Email form
+  condition:
+    - active_loop: update_email_details_form
+  steps:
+    - action: update_email_details_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - action: submit_update_email_details_form

@@ -21,7 +21,7 @@ stories:
     - intent: renew_policy
     - action: action_renew_policy
 
-- story: User Details
+- story: User Details Submission
   steps:
     - intent: user_details
     - action: action_user_details
@@ -31,47 +31,12 @@ stories:
     - intent: get_all_user
     - action: action_get_all_user
 
-- story: Update User Details
-  steps:
-    - intent: update_user
-    - action: action_update_user
-
-- story: Update your Email
-  steps:
-    - intent: update_email
-    - action: action_update_email
-    - intent: set_email
-    - action: action_set_email_form
-  
 - story: Confirm User Data
   steps:
-    - intent: confirm_user
+    - intent: confirm_user_details
     - action: action_confirm_user_details
 
-# - story: Activate and Submit Health Policy form
-#   steps:
-#     - intent: health_policy
-#     - action: action_health_policy
-#     - action: health_policy_form
-#     - active_loop: health_policy_form
-#     - action: health_policy_form
-#     - active_loop: null
-#     - slot_was_set:
-#         - requested_slot: null
-#     - action: action_submit_health_policy_form
-
-# - story: Activate Health Policy form
-#   steps:
-#     - intent: health_policy
-#     - action: action_health_policy
-#     - action: health_policy_form
-#     - active_loop: health_policy_form
-
-# - story: Submit Health Policy form
-#   steps:
-#     - action: health_policy_form
-#     - active_loop: null
-#     - slot_was_set:
-#         - requested_slot: null
-#     - action: action_submit_health_policy_form
-#               action_submit_health_policy_form
+- story: Update User Details
+  steps:
+    - intent: update_user_details
+    - action: action_update_user_details

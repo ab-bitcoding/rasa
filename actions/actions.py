@@ -25,7 +25,7 @@ class ActionGreetUser(Action):
         # Retrieve the mobile number from metadata
         metadata = tracker.latest_message.get('metadata', {})
         user_phone_number = metadata.get("sender")
-        print("user_phone_number:::::::::;;", user_phone_number)
+        print("greet user_phone_number:::::::::", user_phone_number)
 
         if user_phone_number:
             user_data = fetch_user_data(user_phone_number)
@@ -52,8 +52,8 @@ class ActionGreetUser(Action):
             )
 
             buttons = [
-                {"title": "Update", "payload": '/update_user'},
-                {"title": "Confirm", "payload": '/confirm_user'}
+                {"title": "Update", "payload": '/update_user_details'},
+                {"title": "Confirm", "payload": '/confirm_user_details'}
             ]
 
             dispatcher.utter_message(text=message, buttons=buttons)
@@ -80,6 +80,7 @@ class ActionGreetUser(Action):
 
             dispatcher.utter_message(text=message, buttons=buttons)
             return [SlotSet("phone_number", None)]
+
 
 class ActionConfirmUserDetails(Action):
     def name(self) -> Text:
@@ -244,6 +245,7 @@ class ActionHealthPolicy(Action):
         dispatcher.utter_message(text=message)
         return []
 
+
 class ActionUserDetails(Action):
     def name(self) -> Text:
         return "action_user_details"
@@ -278,6 +280,7 @@ class ActionUserDetails(Action):
         
         return "\n".join(user_details)
 
+
 class ActionAddUser(Action):
     def name(self) -> Text:
         return "action_add_user"
@@ -291,96 +294,9 @@ class ActionAddUser(Action):
         return []
 
 
-# class ActionUpdateUser(Action):
-#     def name(self) -> Text:
-#         return "action_update_user"
-    
-#     def run(deslf,
-#             dispatcher:CollectingDispatcher,
-#             tracker:Tracker,
-#             domain:Dict[Text,Any])-> List[Dict[Text,Any]]:
-#         update_field = tracker.get_slot('update_field')
-#         update_value = tracker.get_slot('update_value')
-#         print("update_field::::",update_field)
-#         if not update_field:
-#             # Prompt the user to specify which field they want to update
-#             dispatcher.utter_message(
-#                 text="Which field would you like to update? Please choose from the following: Name, Email, Age, Phone Number, or Income."
-#             )
-#             return []
-        
-#         current_data = {
-#             'name': tracker.get_slot('name'),
-#             'email': tracker.get_slot('email'),
-#             'age': tracker.get_slot('age'),
-#             'phone_number': tracker.get_slot('phone_number'),
-#             'income': tracker.get_slot('income')
-#         }
-#         print("current_data::::",current_data)
-
-
-#         if update_field.lower() not in current_data:
-#             dispatcher.utter_message(text="Invalid field. Please choose a valid field to update.")
-#             return []
-
-#         # Display the current value of the specified field
-#         dispatcher.utter_message(
-#             text=f"The current value for {update_field} is: {current_data[update_field.lower()]}. Please provide the new value."
-#         )
-
-#         if not update_value:
-#             # Prompt for the new value if not provided
-#             dispatcher.utter_message(
-#                 text=f"Please provide the new value for {update_field}."
-#             )
-#             return []
-        
-#          # Update the slot with the new value
-#         tracker.slots[update_field.lower()] = update_value
-
-
-#         # user_phone_number = tracker.get_slot('phone_number')
-#         # username = tracker.get_slot('username')
-#         # print("username::::", username)
-#         # email = tracker.get_slot('email')
-#         # print("email::::", email)
-#         # age = tracker.get_slot('age')
-#         # print("age::::", age)
-#         # # phone_number = tracker.get_slot('phone_number')
-#         # income = tracker.get_slot('income')
-#         # print("income::::", income)
-
-
-#         if not user_phone_number:
-#             # If user_id is not provided, ask for it
-#             dispatcher.utter_message(text="Please provide your Phone Number to proceed with the update.")
-#             return []
-
-#         payload = {
-#             'username': username,
-#             'email': email,
-#             'age': age,
-#             'phone_number': user_phone_number,
-#             'income': income
-#         }
-
-#         api_url = f"http://127.0.0.1:8000/v1/user/{user_phone_number}"
-#         response = requests.put(api_url, json=payload)
-
-#         if response.status_code == 200:
-#             dispatcher.utter_message(text="Your details have been successfully updated.")
-#         else:
-#             dispatcher.utter_message(text="There was an error updating your details. Please try again.")
-#         # # Prepare the payload with user_id
-#         # payload = {'phone_number': user_phone_number}
-#         # message = ("Update Form, Please can tell your id")
-#         # dispatcher.utter_message(text=message)
-#         return []
-
-
-class ActionUpdateUser(Action):
+class ActionUpdateUserDetails(Action):
     def name(self) -> Text:
-        return "action_update_user"
+        return "action_update_user_details"
     
     def run(self,
             dispatcher:CollectingDispatcher,
@@ -388,123 +304,100 @@ class ActionUpdateUser(Action):
             domain: Dict[Text,Any]) -> List[Dict[Text,Any]]:
         
         phone_number = tracker.get_slot('phone_number')
-        print(f"phone_number: {phone_number}")
+        print(f"Get Update User Details Phone Number: {phone_number}")
 
         if phone_number:
 
             message = (
                 "Please, tell me which field you want to update"
             )
-            dispatcher.utter_message(text=message)
+            buttons = [
+                {"title": "Update Email", "payload" : "/update_email_details"},
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
 
             return []
 
-# class ActionFieldUpdateEmail(Action):
-#     def name(self) -> Text:
-#         return "action_field_update_email"
+
+class ActionUpdateEmailDetails(Action):
+    def name(self) -> Text:
+        return "action_update_email_details"
     
-#     def run(self,
-#             dispatcher:CollectingDispatcher,
-#             tracker: Tracker,
-#             domian:Dict[Text,Any]) -> List[Dict[Text, Any]]:
+    def run(self,
+            dispatcher:CollectingDispatcher,
+            tracker:Tracker,
+            domain:Dict[Text,Any])-> List[Dict[Text, Any]]:
         
-#         phone_number = tracker.get_slot('phone_number')
-#         print(f"phone_number: {phone_number}")
+        phone_number = tracker.get_slot('phone_number')
+        email = tracker.get_slot("email")
 
-#         if phone_number:
-
-#             # name = tracker.get_slot('name')
-#             # print(f"name: {name}")
-#             email = tracker.get_slot("email")
-#             print(f"email: {email}")
-#             # age = tracker.get_slot("age")
-#             # print(f"age: {age}")
-#             # income = tracker.get_slot("income")
-#             # print(f"income: {income}")
-#             # message = (
-#             #     "Please, tell me which field you want to update"
-#             # )
-#             # dispatcher.utter_message(text=message)
-            
-#             data_input = tracker.latest_message.get('text').lower()
-#             print(f"data_input: {data_input}")
-#             if data_input == "email":
-#                 message = (f"Your mail is {email} \n \n Please Enter your new email")
-#                 dispatcher.utter_message(text=message)
-#                 empty_gmail = SlotSet("email",None)
-#                 print(f"empty_gmail: {empty_gmail}")
-#                 return [empty_gmail]
-#             if tracker.get_slot('email') is None:
-#                 new_email = tracker.latest_message.get('text').strip().lower()
-#                 dispatcher.utter_message(text=f"Your email has been updated \n *Email*: {new_email}.")
-#                 return [SlotSet("email", new_email)]
+        if phone_number:
+                dispatcher.utter_message(text=f"Your 📧 *email*: *{email}* \n \n Please provide the new email address:")
+                return []
 
 
-class ActionUpdateEmail(Action):
-    def name(self) -> str:
-        return "action_update_email"
+        
 
+class ValidateUpdateEmailDetailsForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_update_email_details_form"
+    
+    def validate_update_email(self,
+            slot_vlaue: Any,
+            dispatcher:CollectingDispatcher,
+            tracker:Tracker,
+            domain:Dict[Text, Any]) -> List[Dict[Text,Any]]:
+        
+        phone_number = tracker.get_slot('phone_number')
+        if phone_number:
+            update_email = tracker.get_slot('update_email').strip().lower()
+
+            if "@" in update_email and "." in update_email and len(update_email) > 7:
+                return {"update_email": update_email}
+            else:
+                dispatcher.utter_message(text="Please enter a valid email address.")
+            return {"update_email": None}
+
+    
+class SubmitUpdateEmailDetailsForm(Action):
+    def name(self) -> Text:
+        return "submit_update_email_details_form"
+    
     def run(self,
             dispatcher: CollectingDispatcher,
             tracker: Tracker,
-            domain: DomainDict) -> List[Dict[Text,Any]]:
-        email = tracker.get_slot("email")
-        dispatcher.utter_message(text=f"Your 📧 *email*: *{email}* \n \n Please provide the new email address:")
-        return [SlotSet("email", None)]  # Clear the current email slot value
+            domain:Dict[Text, Any]
+        ) -> List[Dict[Text, Any]]:
 
-
-class ActionSetEmailForm(Action):
-    def name(self) -> str:
-        return "action_set_email_form"
-
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> list:
-
+        updated_email = tracker.get_slot('update_email')
+        print(f"updated_email: {updated_email}")
+        ## Call the Update API
         phone_number = tracker.get_slot("phone_number")
-        print(f"Action set phone number: {phone_number}")
-        if phone_number:
-            new_email = tracker.latest_message.get('text').strip().lower()
-            # get_email = tracker.get_slot('email').strip().lower()
-            email = re.sub(r'\s+', '', new_email)
-            print(f"This is email: {email}")
-            if "@" in email and "." in email and len(email) > 7:
-                dispatcher.utter_message(text=f"Your updated 📧 *email*: {new_email} \n \n  Do you want to update another field?")
-                return {"email": email}
-            else:
-                dispatcher.utter_message(text="Please enter a valid email address.")
-                return {"email": None}
-            
-    # def validate_email(self,
-    #                 slot_value:Any,
-    #                 dispatcher:CollectingDispatcher,
-    #                 tracker: Tracker,
-    #                 domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
-    
-
-    # get_email = tracker.get_slot('email').strip().lower()
-    # email = re.sub(r'\s+', '', get_email)
-    # print(f"This is email: {email}")
-    # if "@" in email and "." in email and len(email) > 7:
-    #     dispatcher.utter_message(text="Thanks! Now, could you please provide your age?")
-    #     return {"email": email}
-    # else:
-    #     dispatcher.utter_message(text="Please enter a valid email address.")
-    #     return {"email": None}
-
-            
-
-class ActionSubmitSetEmailForm(Action):
-    def name(self) -> Text:
-        return "action_submit_set_email_form"
-    
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> list:
-        email  = tracker.get_slot("email")
-        if email is not None:
-            dispatcher.messages(text=f"Your Updated Email is {email}")
-            return []
-        else:
-            dispatcher.messages(text=f"Can not Find Email: {email}")
-            return []
-
+        url = f"http://127.0.0.1:8000/v1/user/{phone_number}"
+        payload = {
+            "email":updated_email
+        }
+        response = requests.put(url, json=payload)
+        response.raise_for_status()
+        user_data =  response.json()
+        name = user_data.get('username', '')
+        email = user_data.get('email', '')
+        age = user_data.get('age', '')
+        phone_number = user_data.get('phone_number', '')
+        income = user_data.get('income', '')
+        message = (
+            "Hello,\n \n"
+            "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
+            "🔍 Here's the *Updated* information about you: \n"
+            f"👤 *Username:* {name}\n"
+            f"📧 *Email:* {email}\n"
+            f"🎂 *Age:* {age}\n"
+            f"📞 *Phone Number:* {phone_number}\n"
+            f"💼 *Income:* {income}\n"
+        )
+        dispatcher.utter_message(text=message)
+        empty_update_email_slot = SlotSet("update_email", None)
+        return [empty_update_email_slot]
 
 
 
@@ -617,7 +510,7 @@ class ValidateHealthPolicyForm(FormValidationAction):
 
         phone_number = tracker.get_slot('phone_number')
         print(f"This is Phone Number: {phone_number}")
-        if phone_number.isdigit() and len(phone_number) == 10:
+        if phone_number.isdigit() and len(phone_number) <= 15:
             dispatcher.utter_message(text="Thanks! Now, could you please provide your Income?") 
             return {"phone_number": phone_number}
         else:
@@ -630,7 +523,7 @@ class ValidateHealthPolicyForm(FormValidationAction):
                     tracker: Tracker,
                     domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
 
-        income = tracker.get_slot('income').strip()
+        income = tracker.get_slot('income')
         print(f"This is Income: {income}")
         try:
             income_value = float(income)
@@ -686,9 +579,9 @@ class ValidateUserDetailsForm(FormValidationAction):
                     tracker: Tracker,
                     domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
 
-        age  = tracker.get_slot('age')
+        age = tracker.get_slot('age')
         print(f"This is age: {age}")
-        if age.isdigit() and 0 < int(age) <= 120:
+        if age and 0 < age <= 120:
             dispatcher.utter_message(text="Thanks! Now, could you please provide your Phone Number?") 
             return {"age": age}
         else:
@@ -703,7 +596,7 @@ class ValidateUserDetailsForm(FormValidationAction):
 
         phone_number = tracker.get_slot('phone_number')
         print(f"This is Phone Number: {phone_number}")
-        if phone_number.isdigit() and len(phone_number) == 10:
+        if phone_number.isdigit() and len(phone_number) <= 15:
             dispatcher.utter_message(text="Thanks! Now, could you please provide your Income?") 
             return {"phone_number": phone_number}
         else:
@@ -716,7 +609,7 @@ class ValidateUserDetailsForm(FormValidationAction):
                     tracker: Tracker,
                     domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
 
-        income = tracker.get_slot('income').strip()
+        income = tracker.get_slot('income')
         print(f"This is Income: {income}")
         try:
             income_value = float(income)

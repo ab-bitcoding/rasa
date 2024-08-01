@@ -7,12 +7,10 @@ intents:
   - renew_policy
   - emergency_support
   - user_details
-  - confirm_user
+  - confirm_user_details
   - add_user
-  - update_user
-  - update_email
-  - set_email
-  - inform
+  - update_user_details
+  - update_email_details
   - get_all_user
   - near_by_workshop
   - health_policy
@@ -26,6 +24,7 @@ entities:
   - age
   - phone_number
   - income
+  - update_email
 
 slots:
   language:
@@ -67,8 +66,16 @@ slots:
             requested_slot: email
           - active_loop: user_details_form
             requested_slot: email
-          - active_loop: set_email_form
-            requested_slot: email
+
+  update_email:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: update_email_details_form
+            requested_slot: update_email
+
 
   age:
     type: text
@@ -103,13 +110,6 @@ slots:
           - active_loop: user_details_form
             requested_slot: income
 
-  # user_action:
-  #   type: text
-  #   influence_conversation: true
-  #   mappings:
-  #     - type: from_entity
-  #       entity: user_action
-
 
 forms:
   emergency_support_pincode_form:
@@ -135,9 +135,10 @@ forms:
       - age
       - phone_number
       - income
-  set_email_form:
+
+  update_email_details_form:
     required_slots:
-      - email
+      - update_email
 
 responses:
   utter_greet:
@@ -168,15 +169,12 @@ actions:
   - action_submit_user_details_form
   - action_get_all_user
   - action_add_user
-  - action_update_user
+  - action_update_user_details
   - action_confirm_user_details
-  # - action_field_update_email
-  - action_update_email
-  - action_set_email_form
-  - action_submit_set_email_form
 
-
-
+  - action_update_email_details
+  - validate_update_email_details_form
+  - submit_update_email_details_form
 
 session_config:
   session_expiration_time: 60
