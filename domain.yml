@@ -124,6 +124,15 @@ slots:
           - active_loop: user_details_form
             requested_slot: phone_number
 
+  update_phone_number:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: update_phone_number_details_form
+            requested_slot: update_phone_number
+
   income:
     type: text
     influence_conversation: true
@@ -134,7 +143,6 @@ slots:
             requested_slot: income
           - active_loop: user_details_form
             requested_slot: income
-
 
   update_income:
     type: text
@@ -186,6 +194,10 @@ forms:
     required_slots:
       - update_income
 
+  update_phone_number_details_form:
+    required_slots:
+      - update_phone_number
+
 responses:
   utter_greet:
   - text: "Hey! How are you?"
@@ -233,6 +245,10 @@ actions:
   - action_update_income_details
   - validate_update_income_details_form
   - submit_update_income_details_form
+
+  - action_update_phone_number_details
+  - validate_update_phone_number_details_form
+  - submit_update_phone_number_details_form
 
 session_config:
   session_expiration_time: 60
