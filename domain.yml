@@ -104,6 +104,15 @@ slots:
           - active_loop: user_details_form
             requested_slot: age
 
+  update_age:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: update_age_details_form
+            requested_slot: update_age
+
   phone_number:
     type: text
     influence_conversation: true
@@ -160,6 +169,10 @@ forms:
     required_slots:
       - update_username
 
+  update_age_details_form:
+    required_slots:
+      - update_age
+
 responses:
   utter_greet:
   - text: "Hey! How are you?"
@@ -199,6 +212,10 @@ actions:
   - action_update_username_details
   - validate_update_username_details_form
   - submit_update_username_details_form
+
+  - action_update_age_details
+  - validate_update_age_details_form
+  - submit_update_age_details_form
 
 session_config:
   session_expiration_time: 60

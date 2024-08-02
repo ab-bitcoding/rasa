@@ -108,3 +108,21 @@ rules:
     - slot_was_set:
       - requested_slot: null
     - action: submit_update_username_details_form
+
+
+- rule: Activate Update Age From
+  steps:
+    - intent: update_age_details
+    - action: action_update_age_details
+    - action: update_age_details_form
+    - active_loop: update_age_details_form
+
+- rule: Submit Update Age Form
+  condition:
+    - active_loop: update_age_details_form
+  steps:
+    - action: update_age_details_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - action: submit_update_age_details_form
