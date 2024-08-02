@@ -60,5 +60,30 @@ def fetch_user_data(phone_number: str) -> Dict[str, Any]:
         print(f"API request failed: {e}")
         return {}
     
-def update_user_data():
-    pass
+import requests
+
+import requests
+
+def update_user_details(phone_number: str, payload: dict) -> dict:
+    """
+    Updates the user's details in the system.
+
+    Args:
+        phone_number (str): The phone number of the user.
+        payload (dict): The dictionary containing the data to update.
+
+    Returns:
+        dict: The response data from the API call.
+    """
+    url = f"http://127.0.0.1:8000/v1/user/{phone_number}"
+
+    try:
+        response = requests.put(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as err:
+        print(f"An error occurred: {err}")
+    return {}
+

@@ -8,7 +8,7 @@ from rasa_sdk.events import SlotSet, FollowupAction
 from rasa_sdk.types import DomainDict
 import requests
 import re
-from utils.utils import create_user, fetch_user_data, fetch_all_user_data
+from utils.utils import create_user, fetch_user_data, fetch_all_user_data, update_user_details
 from channels.whatsapp import WhatsAppOutput 
 load_dotenv()
 
@@ -309,14 +309,94 @@ class ActionUpdateUserDetails(Action):
         if phone_number:
 
             message = (
-                "Please, tell me which field you want to update"
+                "Please let me know which field you'd like to update:"
             )
             buttons = [
+                {"title": "Update Username", "payload" : "/update_username_details"},
                 {"title": "Update Email", "payload" : "/update_email_details"},
+                {"title": "Update Age", "payload" : "/update_age_details"},
+                {"title": "Update Phone Number", "payload" : "/update_phone_number_details"},
+                {"title": "Update Income", "payload" : "/update_income_details"},
             ]
             dispatcher.utter_message(text=message, buttons=buttons)
 
             return []
+
+
+class ActionUpdateUsernameDetails(Action):
+    def name(self) -> Text:
+        return "action_update_username_details"
+    
+    def run(self,
+            dispatcher:CollectingDispatcher,
+            tracker:Tracker,
+            domain:Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        phone_number = tracker.get_slot('phone_number')
+        username = tracker.get_slot("name")
+
+        if phone_number:
+                dispatcher.utter_message(text=f"Your 👤 *username*: *{username}* \n \n Please provide the new username:")
+                return []
+
+
+class ValidateUpdateUsernameDetailsForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_update_username_details_form"
+    
+    def validate_update_username(self,
+            slot_vlaue: Any,
+            dispatcher:CollectingDispatcher,
+            tracker:Tracker,
+            domain:Dict[Text, Any]) -> List[Dict[Text,Any]]:
+        
+        phone_number = tracker.get_slot('phone_number')
+        if phone_number:
+            update_username = tracker.get_slot('update_username').strip().lower()
+
+            if update_username.isalpha():
+                return {"update_username": update_username}
+            else:
+                dispatcher.utter_message(text="Please enter a valid username.")
+            return {"update_username": None}
+
+class SubmitUpdateUsernameDetailsForm(Action):
+    def name(self) -> Text:
+        return "submit_update_username_details_form"
+    
+    def run(self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain:Dict[Text, Any]
+        ) -> List[Dict[Text, Any]]:
+
+        phone_number = tracker.get_slot("phone_number")
+        if phone_number:
+            update_username = tracker.get_slot('update_username')
+            print(f"update_username: {update_username}")
+            ## Call the Update API
+            payload = {
+                "username": update_username
+            }
+            user_data = update_user_details(phone_number, payload)
+            name = user_data.get('username', '')
+            email = user_data.get('email', '')
+            age = user_data.get('age', '')
+            phone_number = user_data.get('phone_number', '')
+            income = user_data.get('income', '')
+            message = (
+                "Hello,\n \n"
+                "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
+                "🔍 Here's the *Updated* information about you: \n"
+                f"👤 *Username:* {name}\n"
+                f"📧 *Email:* {email}\n"
+                f"🎂 *Age:* {age}\n"
+                f"📞 *Phone Number:* {phone_number}\n"
+                f"💼 *Income:* {income}\n"
+            )
+            dispatcher.utter_message(text=message)
+            empty_update_username_slot = SlotSet("update_username", None)
+            return [empty_update_username_slot]
 
 
 class ActionUpdateEmailDetails(Action):
@@ -335,8 +415,6 @@ class ActionUpdateEmailDetails(Action):
                 dispatcher.utter_message(text=f"Your 📧 *email*: *{email}* \n \n Please provide the new email address:")
                 return []
 
-
-        
 
 class ValidateUpdateEmailDetailsForm(FormValidationAction):
     def name(self) -> Text:
@@ -369,37 +447,33 @@ class SubmitUpdateEmailDetailsForm(Action):
             domain:Dict[Text, Any]
         ) -> List[Dict[Text, Any]]:
 
-        updated_email = tracker.get_slot('update_email')
-        print(f"updated_email: {updated_email}")
-        ## Call the Update API
         phone_number = tracker.get_slot("phone_number")
-        url = f"http://127.0.0.1:8000/v1/user/{phone_number}"
-        payload = {
-            "email":updated_email
-        }
-        response = requests.put(url, json=payload)
-        response.raise_for_status()
-        user_data =  response.json()
-        name = user_data.get('username', '')
-        email = user_data.get('email', '')
-        age = user_data.get('age', '')
-        phone_number = user_data.get('phone_number', '')
-        income = user_data.get('income', '')
-        message = (
-            "Hello,\n \n"
-            "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
-            "🔍 Here's the *Updated* information about you: \n"
-            f"👤 *Username:* {name}\n"
-            f"📧 *Email:* {email}\n"
-            f"🎂 *Age:* {age}\n"
-            f"📞 *Phone Number:* {phone_number}\n"
-            f"💼 *Income:* {income}\n"
-        )
-        dispatcher.utter_message(text=message)
-        empty_update_email_slot = SlotSet("update_email", None)
-        return [empty_update_email_slot]
-
-
+        if phone_number:
+            updated_email = tracker.get_slot('update_email')
+            print(f"updated_email: {updated_email}")
+            ## Call the Update API
+            payload = {
+                "email":updated_email
+            }
+            user_data = update_user_details(phone_number, payload)
+            name = user_data.get('username', '')
+            email = user_data.get('email', '')
+            age = user_data.get('age', '')
+            phone_number = user_data.get('phone_number', '')
+            income = user_data.get('income', '')
+            message = (
+                "Hello,\n \n"
+                "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
+                "🔍 Here's the *Updated* information about you: \n"
+                f"👤 *Username:* {name}\n"
+                f"📧 *Email:* {email}\n"
+                f"🎂 *Age:* {age}\n"
+                f"📞 *Phone Number:* {phone_number}\n"
+                f"💼 *Income:* {income}\n"
+            )
+            dispatcher.utter_message(text=message)
+            empty_update_email_slot = SlotSet("update_email", None)
+            return [empty_update_email_slot]
 
 
 class ValidateEmergencySupportPincodeForm(FormValidationAction):
@@ -834,5 +908,4 @@ class ActionGetAllUser(Action):
             dispatcher.utter_message(text="Failed to retrieve user details.")
 
         return []
-
 

@@ -91,3 +91,20 @@ rules:
     - slot_was_set:
       - requested_slot: null
     - action: submit_update_email_details_form
+
+- rule: Activate Update Username From
+  steps:
+    - intent: update_username_details
+    - action: action_update_username_details
+    - action: update_username_details_form
+    - active_loop: update_username_details_form
+
+- rule: Submit Update Username Form
+  condition:
+    - active_loop: update_username_details_form
+  steps:
+    - action: update_username_details_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - action: submit_update_username_details_form
