@@ -109,7 +109,6 @@ rules:
       - requested_slot: null
     - action: submit_update_username_details_form
 
-
 - rule: Activate Update Age From
   steps:
     - intent: update_age_details
@@ -126,3 +125,20 @@ rules:
     - slot_was_set:
       - requested_slot: null
     - action: submit_update_age_details_form
+
+- rule: Activate Update Income From
+  steps:
+    - intent: update_income_details
+    - action: action_update_income_details
+    - action: update_income_details_form
+    - active_loop: update_income_details_form
+
+- rule: Submit Update Income Form
+  condition:
+    - active_loop: update_income_details_form
+  steps:
+    - action: update_income_details_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - action: submit_update_income_details_form

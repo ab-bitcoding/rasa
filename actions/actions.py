@@ -437,7 +437,7 @@ class ValidateUpdateEmailDetailsForm(FormValidationAction):
                 dispatcher.utter_message(text="Please enter a valid email address.")
             return {"update_email": None}
 
-    
+
 class SubmitUpdateEmailDetailsForm(Action):
     def name(self) -> Text:
         return "submit_update_email_details_form"
@@ -553,6 +553,83 @@ class SubmitUpdateAgeDetailsForm(Action):
             empty_update_age_slot = SlotSet("update_age", None)
             return [empty_update_age_slot]
     
+
+class ActionUpdateIncomeDetails(Action):
+    def name(self) -> Text:
+        return "action_update_income_details"
+    
+    def run(self,
+            dispatcher:CollectingDispatcher,
+            tracker:Tracker,
+            domain:Dict[Text,Any])-> List[Dict[Text, Any]]:
+        
+        phone_number = tracker.get_slot('phone_number')
+        income = tracker.get_slot("income")
+
+        if phone_number:
+                dispatcher.utter_message(text=f"Your 💼 *Income*: *{income}* \n \n Please provide the new Income:")
+                return []
+
+
+class ValidateUpdateIncomeDetailsForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_update_income_details_form"
+    
+    def validate_update_income(self,
+            slot_vlaue: Any,
+            dispatcher:CollectingDispatcher,
+            tracker:Tracker,
+            domain:Dict[Text, Any]) -> List[Dict[Text,Any]]:
+        
+        phone_number = tracker.get_slot('phone_number')
+        if phone_number:
+            update_income = tracker.get_slot('update_income').strip()
+
+            if update_income.isdigit() and int(update_income) > 0:
+                return {"update_income": update_income}
+            else:
+                dispatcher.utter_message(text="Please enter a valid income.")
+            return {"update_income": None}
+
+
+class SubmitUpdateIncomeDetailsForm(Action):
+    def name(self) -> Text:
+        return "submit_update_income_details_form"
+    
+    def run(self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]
+        ) -> List[Dict[Text, Any]]:
+
+        phone_number = tracker.get_slot("phone_number")
+        if phone_number:
+            updated_income = tracker.get_slot('update_income')
+            print(f"updated_income: {updated_income}")
+            ## Call the Update API
+            payload = {
+                "income": updated_income
+            }
+            user_data = update_user_details(phone_number, payload)
+            name = user_data.get('username', '')
+            email = user_data.get('email', '')
+            age = user_data.get('age', '')
+            phone_number = user_data.get('phone_number', '')
+            income = user_data.get('income', '')
+            message = (
+                "Hello,\n \n"
+                "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
+                "🔍 Here's the *Updated* information about you: \n"
+                f"👤 *Username:* {name}\n"
+                f"📧 *Email:* {email}\n"
+                f"🎂 *Age:* {age}\n"
+                f"📞 *Phone Number:* {phone_number}\n"
+                f"💼 *Income:* {income}\n"
+            )
+            dispatcher.utter_message(text=message)
+            empty_update_income_slot = SlotSet("update_income", None)
+            return [empty_update_income_slot]
+
 
 class ValidateEmergencySupportPincodeForm(FormValidationAction):
     def name(self) -> Text:
