@@ -394,7 +394,13 @@ class SubmitUpdateUsernameDetailsForm(Action):
                 f"📞 *Phone Number:* {phone_number}\n"
                 f"💼 *Income:* {income}\n"
             )
-            dispatcher.utter_message(text=message)
+            buttons = [
+                {"title": "Update Username", "payload" : "/update_username_details"},
+                {"title": "Update Email", "payload" : "/update_email_details"},
+                {"title": "Update Age", "payload" : "/update_age_details"},
+                {"title": "Update Income", "payload" : "/update_income_details"},
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
             empty_update_username_slot = SlotSet("update_username", None)
             return [empty_update_username_slot]
 
@@ -448,8 +454,9 @@ class SubmitUpdateEmailDetailsForm(Action):
         ) -> List[Dict[Text, Any]]:
 
         phone_number = tracker.get_slot("phone_number")
+        updated_email = tracker.get_slot('update_email').lower()
         if phone_number:
-            updated_email = tracker.get_slot('update_email')
+            updated_email = re.sub(r'\s+', '', updated_email)
             print(f"updated_email: {updated_email}")
             ## Call the Update API
             payload = {
@@ -471,7 +478,13 @@ class SubmitUpdateEmailDetailsForm(Action):
                 f"📞 *Phone Number:* {phone_number}\n"
                 f"💼 *Income:* {income}\n"
             )
-            dispatcher.utter_message(text=message)
+            buttons = [
+                {"title": "Update Username", "payload" : "/update_username_details"},
+                {"title": "Update Email", "payload" : "/update_email_details"},
+                {"title": "Update Age", "payload" : "/update_age_details"},
+                {"title": "Update Income", "payload" : "/update_income_details"},
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
             empty_update_email_slot = SlotSet("update_email", None)
             return [empty_update_email_slot]
 
@@ -548,85 +561,17 @@ class SubmitUpdateAgeDetailsForm(Action):
                 f"📞 *Phone Number:* {phone_number}\n"
                 f"💼 *Income:* {income}\n"
             )
-            dispatcher.utter_message(text=message)
+            buttons = [
+                {"title": "Update Username", "payload" : "/update_username_details"},
+                {"title": "Update Email", "payload" : "/update_email_details"},
+                {"title": "Update Age", "payload" : "/update_age_details"},
+                {"title": "Update Income", "payload" : "/update_income_details"},
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
             empty_update_age_slot = SlotSet("update_age", None)
             return [empty_update_age_slot]
 
 
-class ActionUpdatePhoneNumberDetails(Action):
-    def name(self) -> Text:
-        return "action_update_phone_number_details"
-    
-    def run(self,
-            dispatcher:CollectingDispatcher,
-            tracker:Tracker,
-            domain:Dict[Text,Any])-> List[Dict[Text, Any]]:
-        
-        phone_number = tracker.get_slot('phone_number')
-        if phone_number:
-                dispatcher.utter_message(text=f"Your 📞 *Phone Number*: *{phone_number}* \n \n Please provide the new phone number:")
-                return []
-
-
-class ValidateUpdatePhoneNumberDetailsForm(FormValidationAction):
-    def name(self) -> Text:
-        return "validate_update_phone_number_details_form"
-    
-    def validate_update_phone_number(self,
-            slot_vlaue: Any,
-            dispatcher:CollectingDispatcher,
-            tracker:Tracker,
-            domain:Dict[Text, Any]) -> List[Dict[Text,Any]]:
-        
-        phone_number = tracker.get_slot('phone_number')
-        if phone_number:
-            update_phone_number = tracker.get_slot('update_phone_number').strip()
-            print(f"validate update_phone_number: {update_phone_number}")
-
-            if update_phone_number.isdigit() and 9 <= len(update_phone_number) <= 15:
-                return {"update_phone_number": update_phone_number}
-            else:
-                dispatcher.utter_message(text="Please enter a valid phone number")
-                return {"update_phone_number": None}
-
-
-class SubmitUpdatePhoneNumberDetailsForm(Action):
-    def name(self) -> Text:
-        return "submit_update_phone_number_details_form"
-    
-    def run(self,
-            dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain:Dict[Text, Any]
-        ) -> List[Dict[Text, Any]]:
-
-        phone_number = tracker.get_slot("phone_number")
-        if phone_number:
-            updated_phone_number = tracker.get_slot('update_phone_number')
-            print(f"updated_phone_number: {updated_phone_number}")
-            ## Call the Update API
-            payload = {
-                "phone_number":updated_phone_number
-            }
-            user_data = update_user_details(phone_number, payload)
-            name = user_data.get('username', '')
-            email = user_data.get('email', '')
-            age = user_data.get('age', '')
-            phone_number = user_data.get('phone_number', '')
-            income = user_data.get('income', '')
-            message = (
-                "Hello,\n \n"
-                "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
-                "🔍 Here's the *Updated* information about you: \n"
-                f"👤 *Username:* {name}\n"
-                f"📧 *Email:* {email}\n"
-                f"🎂 *Age:* {age}\n"
-                f"📞 *Phone Number:* {phone_number}\n"
-                f"💼 *Income:* {income}\n"
-            )
-            dispatcher.utter_message(text=message)
-            empty_update_age_slot = SlotSet("update_age", None)
-            return [empty_update_age_slot]
 
 
 class ActionUpdateIncomeDetails(Action):
@@ -701,7 +646,13 @@ class SubmitUpdateIncomeDetailsForm(Action):
                 f"📞 *Phone Number:* {phone_number}\n"
                 f"💼 *Income:* {income}\n"
             )
-            dispatcher.utter_message(text=message)
+            buttons = [
+                {"title": "Update Username", "payload" : "/update_username_details"},
+                {"title": "Update Email", "payload" : "/update_email_details"},
+                {"title": "Update Age", "payload" : "/update_age_details"},
+                {"title": "Update Income", "payload" : "/update_income_details"},
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
             empty_update_income_slot = SlotSet("update_income", None)
             return [empty_update_income_slot]
 
@@ -1123,7 +1074,7 @@ class ActionGetAllUser(Action):
         user_data = fetch_all_user_data()
         buttons = [
                 {"title": "Main Menu", "payload": '/select_menu_item'}
-            ]
+        ]
         max_message_length = 1500
         if user_data:
             # buttons = [

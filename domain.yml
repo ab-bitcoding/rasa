@@ -13,7 +13,7 @@ intents:
   - update_username_details
   - update_email_details
   - update_age_details
-  - update_phone_number_details
+  # - update_phone_number_details
   - update_income_details
   - get_all_user
   - near_by_workshop
@@ -124,14 +124,14 @@ slots:
           - active_loop: user_details_form
             requested_slot: phone_number
 
-  update_phone_number:
-    type: text
-    influence_conversation: true
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: update_phone_number_details_form
-            requested_slot: update_phone_number
+  # update_phone_number:
+  #   type: text
+  #   influence_conversation: true
+  #   mappings:
+  #     - type: from_text
+  #       conditions:
+  #         - active_loop: update_phone_number_details_form
+  #           requested_slot: update_phone_number
 
   income:
     type: text
@@ -194,9 +194,9 @@ forms:
     required_slots:
       - update_income
 
-  update_phone_number_details_form:
-    required_slots:
-      - update_phone_number
+  # update_phone_number_details_form:
+  #   required_slots:
+  #     - update_phone_number
 
 responses:
   utter_greet:
@@ -246,9 +246,6 @@ actions:
   - validate_update_income_details_form
   - submit_update_income_details_form
 
-  - action_update_phone_number_details
-  - validate_update_phone_number_details_form
-  - submit_update_phone_number_details_form
 
 session_config:
   session_expiration_time: 60
