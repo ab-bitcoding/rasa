@@ -59,10 +59,7 @@ def fetch_user_data(phone_number: str) -> Dict[str, Any]:
     except requests.exceptions.RequestException as e:
         print(f"API request failed: {e}")
         return {}
-    
-import requests
 
-import requests
 
 def update_user_details(phone_number: str, payload: dict) -> dict:
     """

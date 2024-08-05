@@ -270,7 +270,72 @@ class WhatsAppOutput(WhatsApp, OutputChannel):
         # print(f"in send list button part : {buttons}")
         logging.info(f"display button from the whatsapp: {buttons}")
         # logger(level="INFO",message=f"display button from the whatsapp: {buttons}")
-        if (len(buttons) >=4 or 
+        titles = [item['title'] for item in buttons]
+        static_keys = list(button_description.keys())
+        all_present = all(k in static_keys for k in titles)
+        if all_present:
+            for button in buttons:
+                # description = button.get("description")
+                rows_list.append({
+                                "id": button.get("payload"),
+                                "title": button.get("title"),
+                                "description": button_description.get(button.get("title"), "")
+                                # "description": description
+                            })
+        else:
+            for button in buttons:
+                description = button.get("description")
+                rows_list.append({
+                                "id": button.get("payload"),
+                                "title": button.get("title"),
+                                # "description": button_description.get(button.get("title"), "")
+                                "description": description
+                            })
+        
+        check_title = rows_list[0]
+        logging.info(f"value of title: {check_title}")
+        logging.info(f"value of title id: {check_title['id']}")
+        
+        # logging.info(f"value of button_list_name: {button_list_name}")
+        # logger(level="INFO", message=f"value of title: {check_title} id: {check_title['id']} button_list_name: {button_list_name}")
+
+        # button_list_name = "Main Menu"
+        if ("policy_selected" in check_title["id"] or "policyno" in check_title["id"] or "renewal_policyno" in check_title["id"]):
+            if "hindi" in check_title["id"]:
+                button_list_name = "पॉलिसी देखें"
+            elif "english" in check_title["id"]:
+                button_list_name = "Show Policy"
+        elif "renewal_policy" in check_title["id"]:
+            if "hindi" in check_title["id"]:
+                button_list_name = "मेन मेन्यू"
+            elif "english" in check_title["id"]:
+                button_list_name = "Main Menu"
+        elif ("selected_insurance" in check_title["id"]):
+            if "hindi" in check_title["id"]:
+                button_list_name = "क्वोट्स देखें"
+            elif "english" in check_title["id"]:
+                button_list_name = "Show Quotes"
+        elif ("selected_addons" in check_title["id"]):
+            if "hindi" in check_title["id"]:
+                button_list_name = "ऐड-ऑन"
+            elif "english" in check_title["id"]:
+                button_list_name = "Add Ons"
+        elif ("make_payment" in check_title["id"]):
+            if "hindi" in check_title["id"]:
+                button_list_name = "भुगतान करें"
+            elif "english" in check_title["id"]:
+                button_list_name = "Make Payment"
+        
+        # logging.info(f"button list name: {button_list_name}")
+        # logger(level="INFO", message=f"button list name: {button_list_name}")
+
+
+                
+        # print(rows_list)
+        buttons_sections_list.append({
+            "title": "Binary...",
+            "rows": rows_list})
+        if (len(buttons) >4 or 
             len([item["payload"] for item in buttons if "policy_details" in item["payload"]])>0 or 
             len([item["payload"] for item in buttons if "packageId" in item["payload"]])>0 or
             len([item["payload"] for item in buttons if "selected_policy_number" in item["payload"]])>0 or
@@ -278,72 +343,93 @@ class WhatsAppOutput(WhatsApp, OutputChannel):
             len([item["payload"] for item in buttons if "renewal_policyno" in item["payload"]])>0 or
             len([item["payload"] for item in buttons if "payment_selected_option" in item["payload"]])>0 
         ):
-            titles = [item['title'] for item in buttons]
-            static_keys = list(button_description.keys())
-            all_present = all(k in static_keys for k in titles)
-            if all_present:
-                for button in buttons:
-                    # description = button.get("description")
-                    rows_list.append({
-                                    "id": button.get("payload"),
-                                    "title": button.get("title"),
-                                    "description": button_description.get(button.get("title"), "")
-                                    # "description": description
-                                })
-            else:
-                for button in buttons:
-                    description = button.get("description")
-                    rows_list.append({
-                                    "id": button.get("payload"),
-                                    "title": button.get("title"),
-                                    # "description": button_description.get(button.get("title"), "")
-                                    "description": description
-                                })
+            # titles = [item['title'] for item in buttons]
+            # static_keys = list(button_description.keys())
+            # all_present = all(k in static_keys for k in titles)
+            # if all_present:
+            #     for button in buttons:
+            #         # description = button.get("description")
+            #         rows_list.append({
+            #                         "id": button.get("payload"),
+            #                         "title": button.get("title"),
+            #                         "description": button_description.get(button.get("title"), "")
+            #                         # "description": description
+            #                     })
+            # else:
+            #     for button in buttons:
+            #         description = button.get("description")
+            #         rows_list.append({
+            #                         "id": button.get("payload"),
+            #                         "title": button.get("title"),
+            #                         # "description": button_description.get(button.get("title"), "")
+            #                         "description": description
+            #                     })
             
-            check_title = rows_list[0]
-            logging.info(f"value of title: {check_title}")
-            logging.info(f"value of title id: {check_title['id']}")
-            button_list_name = "Main Menu"
-            logging.info(f"value of button_list_name: {button_list_name}")
-            # logger(level="INFO", message=f"value of title: {check_title} id: {check_title['id']} button_list_name: {button_list_name}")
-
+            # check_title = rows_list[0]
+            # logging.info(f"value of title: {check_title}")
+            # logging.info(f"value of title id: {check_title['id']}")
             # button_list_name = "Main Menu"
-            if ("policy_selected" in check_title["id"] or "policyno" in check_title["id"] or "renewal_policyno" in check_title["id"]):
-                if "hindi" in check_title["id"]:
-                    button_list_name = "पॉलिसी देखें"
-                elif "english" in check_title["id"]:
-                    button_list_name = "Show Policy"
-            elif "renewal_policy" in check_title["id"]:
-                if "hindi" in check_title["id"]:
-                    button_list_name = "मेन मेन्यू"
-                elif "english" in check_title["id"]:
-                    button_list_name = "Main Menu"
-            elif ("selected_insurance" in check_title["id"]):
-                if "hindi" in check_title["id"]:
-                    button_list_name = "क्वोट्स देखें"
-                elif "english" in check_title["id"]:
-                    button_list_name = "Show Quotes"
-            elif ("selected_addons" in check_title["id"]):
-                if "hindi" in check_title["id"]:
-                    button_list_name = "ऐड-ऑन"
-                elif "english" in check_title["id"]:
-                    button_list_name = "Add Ons"
-            elif ("make_payment" in check_title["id"]):
-                if "hindi" in check_title["id"]:
-                    button_list_name = "भुगतान करें"
-                elif "english" in check_title["id"]:
-                    button_list_name = "Make Payment"
+            # logging.info(f"value of button_list_name: {button_list_name}")
+            # # logger(level="INFO", message=f"value of title: {check_title} id: {check_title['id']} button_list_name: {button_list_name}")
+
+            # # button_list_name = "Main Menu"
+            # if ("policy_selected" in check_title["id"] or "policyno" in check_title["id"] or "renewal_policyno" in check_title["id"]):
+            #     if "hindi" in check_title["id"]:
+            #         button_list_name = "पॉलिसी देखें"
+            #     elif "english" in check_title["id"]:
+            #         button_list_name = "Show Policy"
+            # elif "renewal_policy" in check_title["id"]:
+            #     if "hindi" in check_title["id"]:
+            #         button_list_name = "मेन मेन्यू"
+            #     elif "english" in check_title["id"]:
+            #         button_list_name = "Main Menu"
+            # elif ("selected_insurance" in check_title["id"]):
+            #     if "hindi" in check_title["id"]:
+            #         button_list_name = "क्वोट्स देखें"
+            #     elif "english" in check_title["id"]:
+            #         button_list_name = "Show Quotes"
+            # elif ("selected_addons" in check_title["id"]):
+            #     if "hindi" in check_title["id"]:
+            #         button_list_name = "ऐड-ऑन"
+            #     elif "english" in check_title["id"]:
+            #         button_list_name = "Add Ons"
+            # elif ("make_payment" in check_title["id"]):
+            #     if "hindi" in check_title["id"]:
+            #         button_list_name = "भुगतान करें"
+            #     elif "english" in check_title["id"]:
+            #         button_list_name = "Make Payment"
             
-            logging.info(f"button list name: {button_list_name}")
-            # logger(level="INFO", message=f"button list name: {button_list_name}")
+            # logging.info(f"button list name: {button_list_name}")
+            # # logger(level="INFO", message=f"button list name: {button_list_name}")
 
 
                    
-            # print(rows_list)
-            buttons_sections_list.append({
-                "title": "Binary...",
-                "rows": rows_list})
-            
+            # # print(rows_list)
+            # buttons_sections_list.append({
+            #     "title": "Binary...",
+            #     "rows": rows_list})
+            button_list_name = "Main Menu"
+            list_dict = {
+                "type": "list",
+                "header": "",
+                "body": text,
+                "footer":"",
+                "action": {
+                    "button": button_list_name,
+                    "sections" : buttons_sections_list
+                    }
+                }
+            self.send_button(button=list_dict, recipient_id=recipient_id)
+        elif(len(buttons) ==4 or
+            len([item["payload"] for item in buttons if "policy_details" in item["payload"]])>0 or 
+            len([item["payload"] for item in buttons if "packageId" in item["payload"]])>0 or
+            len([item["payload"] for item in buttons if "selected_policy_number" in item["payload"]])>0 or
+            len([item["payload"] for item in buttons if "policyno" in item["payload"]])>0  or
+            len([item["payload"] for item in buttons if "renewal_policyno" in item["payload"]])>0 or
+            len([item["payload"] for item in buttons if "payment_selected_option" in item["payload"]])>0 
+        ):
+
+            button_list_name = "Update Fields"
             list_dict = {
                 "type": "list",
                 "header": "",
