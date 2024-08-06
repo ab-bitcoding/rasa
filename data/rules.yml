@@ -7,6 +7,22 @@ rules:
   - intent: goodbye
   - action: utter_goodbye
 
+- rule: Greet
+  steps:
+  - intent: greet
+  - action: action_greet_user
+
+- rule: Confirm User Data
+  steps:
+    - intent: confirm_user_details
+    - action: action_confirm_user_details
+
+- rule: Update User Details
+  steps:
+    - intent: update_user_details
+    - action: action_update_user_details
+
+
 - rule: Activate Emergency Pincode form
   steps:
   - intent: emergency_support

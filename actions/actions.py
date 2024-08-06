@@ -13,7 +13,6 @@ from channels.whatsapp import WhatsAppOutput
 load_dotenv()
 
 class ActionGreetUser(Action):
-
     def name(self) -> Text:
         return "action_greet_user"
 
@@ -25,7 +24,7 @@ class ActionGreetUser(Action):
         # Retrieve the mobile number from metadata
         metadata = tracker.latest_message.get('metadata', {})
         user_phone_number = metadata.get("sender")
-        print("greet user_phone_number:::::::::", user_phone_number)
+        print(f"greet user_phone_number: {user_phone_number}")
 
         if user_phone_number:
             user_data = fetch_user_data(user_phone_number)
@@ -36,19 +35,19 @@ class ActionGreetUser(Action):
                 income  = user_data.get('income')
 
                 message = (
-                    f"Hello,\n\n"
-                    "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance.\n\n"
+                    f"Hello, \n \n"
+                    "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
                     "🔍 Here's the information About you:\n"
                     f"👤 *Username:* {name}\n"
                     f"📧 *Email:* {email}\n"
                     f"🎂 *Age:* {age}\n"
                     f"📞 *Phone Number:* {user_phone_number}\n"
                     f"💼 *Income:* {income}\n"
-                    "-------------------------\n\n"
-                    "To ensure we have the correct information, please select one of the options below:\n\n"
+                    "-------------------------\n \n"
+                    "To ensure we have the correct information, please select one of the options below: \n \n"
                     "🔄 If any details need updating, click on the *Update* button.\n"
-                    "✅ If the information is correct, click on the *Confirm* button.\n\n"
-                    "We're here to assist you with any questions or concerns. Your satisfaction is our priority!\n\n"
+                    "✅ If the information is correct, click on the *Confirm* button.\n \n"
+                    "We're here to assist you with any questions or concerns. Your satisfaction is our priority!\n \n"
                     "Best regards,\n"
                     "VISoF Buddy Team"
                 )
@@ -68,7 +67,12 @@ class ActionGreetUser(Action):
                 ]
 
             else:
-                dispatcher.utter_message(text="It seems we couldn't retrieve your details. Please update your information. \n \n  Please enter your name")
+                message = (
+                    "🚫 We're unable to retrieve your details at the moment. To ensure we have accurate information, please update your details. \n \n"
+                    "📋 Kindly enter your name below to proceed."
+                )
+
+                dispatcher.utter_message(text=message)
                 return [
                     SlotSet("phone_number", user_phone_number),
                     FollowupAction("user_details_form")
@@ -103,7 +107,8 @@ class ActionConfirmUserDetails(Action):
                 {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
                 {"title": "New Policy", "payload": '/new_policy'},
                 {"title": "Health Policy", "payload": '/health_policy'},
-                {"title": "User Details", "payload": '/user_details'}
+                {"title": "User Details", "payload": '/user_details'},
+                {"title": "Update User Details", "payload": '/update_user_details'}
             ]
             dispatcher.utter_message(text=message, buttons=buttons)
             return []
@@ -162,7 +167,6 @@ class ActionMenuList(Action):
                 {"title": "New Policy", "payload": '/new_policy'},
                 {"title": "Health Policy", "payload": '/health_policy'},
                 {"title": "User Details", "payload": '/user_details'}
-
             ]
 
             dispatcher.utter_message(text=message, buttons=buttons)
@@ -395,10 +399,8 @@ class SubmitUpdateUsernameDetailsForm(Action):
                 f"💼 *Income:* {income}\n"
             )
             buttons = [
-                {"title": "Update Username", "payload" : "/update_username_details"},
-                {"title": "Update Email", "payload" : "/update_email_details"},
-                {"title": "Update Age", "payload" : "/update_age_details"},
-                {"title": "Update Income", "payload" : "/update_income_details"},
+                {"title": "Update", "payload": '/update_user_details'},
+                {"title": "Confirm", "payload": '/confirm_user_details'}
             ]
             dispatcher.utter_message(text=message, buttons=buttons)
             empty_update_username_slot = SlotSet("update_username", None)
@@ -479,10 +481,8 @@ class SubmitUpdateEmailDetailsForm(Action):
                 f"💼 *Income:* {income}\n"
             )
             buttons = [
-                {"title": "Update Username", "payload" : "/update_username_details"},
-                {"title": "Update Email", "payload" : "/update_email_details"},
-                {"title": "Update Age", "payload" : "/update_age_details"},
-                {"title": "Update Income", "payload" : "/update_income_details"},
+                {"title": "Update", "payload": '/update_user_details'},
+                {"title": "Confirm", "payload": '/confirm_user_details'}
             ]
             dispatcher.utter_message(text=message, buttons=buttons)
             empty_update_email_slot = SlotSet("update_email", None)
@@ -526,7 +526,7 @@ class ValidateUpdateAgeDetailsForm(FormValidationAction):
                 dispatcher.utter_message(text="Please enter a valid age.")
             return {"update_age": None}
 
-    
+
 class SubmitUpdateAgeDetailsForm(Action):
     def name(self) -> Text:
         return "submit_update_age_details_form"
@@ -562,16 +562,12 @@ class SubmitUpdateAgeDetailsForm(Action):
                 f"💼 *Income:* {income}\n"
             )
             buttons = [
-                {"title": "Update Username", "payload" : "/update_username_details"},
-                {"title": "Update Email", "payload" : "/update_email_details"},
-                {"title": "Update Age", "payload" : "/update_age_details"},
-                {"title": "Update Income", "payload" : "/update_income_details"},
+                {"title": "Update", "payload": '/update_user_details'},
+                {"title": "Confirm", "payload": '/confirm_user_details'}
             ]
             dispatcher.utter_message(text=message, buttons=buttons)
             empty_update_age_slot = SlotSet("update_age", None)
             return [empty_update_age_slot]
-
-
 
 
 class ActionUpdateIncomeDetails(Action):
@@ -647,10 +643,8 @@ class SubmitUpdateIncomeDetailsForm(Action):
                 f"💼 *Income:* {income}\n"
             )
             buttons = [
-                {"title": "Update Username", "payload" : "/update_username_details"},
-                {"title": "Update Email", "payload" : "/update_email_details"},
-                {"title": "Update Age", "payload" : "/update_age_details"},
-                {"title": "Update Income", "payload" : "/update_income_details"},
+                {"title": "Update", "payload": '/update_user_details'},
+                {"title": "Confirm", "payload": '/confirm_user_details'}
             ]
             dispatcher.utter_message(text=message, buttons=buttons)
             empty_update_income_slot = SlotSet("update_income", None)
@@ -966,19 +960,6 @@ class ActionSubmitHealthPolicyForm(Action):
         age = tracker.get_slot('age')
         phone_number = tracker.get_slot('phone_number')
         income = tracker.get_slot('income')
-
-        message = (
-            f"*Details of the Form:* \n \n"
-            f"Your name is *{name}* \n"
-            f"Your email is {email} \n"
-            f"Your age is *{age}* \n"
-            f"Your Phone Number is {phone_number} \n"
-            f"Your Income is {income}"
-        )
-        buttons = [
-                {"title": "Main Menu", "payload": '/select_menu_item'}
-            ]
-        dispatcher.utter_message(text=message, buttons=buttons)
         
         payload = {
             "username": name,
@@ -989,7 +970,25 @@ class ActionSubmitHealthPolicyForm(Action):
         }
         try:
             result = create_user(payload)
-            dispatcher.utter_message(text=f"Form submitted successfully! ID: {result['id']}")
+            message = (
+                "🔍 Here's the information About you:\n"
+                f"👤 *Username:* {result['username']}\n"
+                f"📧 *Email:* {result['email']}\n"
+                f"🎂 *Age:* {result['age']}\n"
+                f"📞 *Phone Number:* {result['phone_number']}\n"
+                f"💼 *Income:* {result['income']}\n"
+            )
+            buttons = [
+                {"title": "Renew Policy", "payload": '/renew_policy'},
+                {"title": "Claims Related", "payload": '/claims_related'},
+                {"title": "Download Policy Copy", "payload": '/download_policy'},
+                {"title": "Emergengy Support", "payload": '/emergency_support'},
+                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+                {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'},
+                {"title": "User Details", "payload": '/user_details'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
         except requests.exceptions.RequestException as e:
             dispatcher.utter_message(text=f"Failed to submit form: {str(e)}")
         return [
@@ -1037,8 +1036,8 @@ class ActionSubmitUserDetailsForm(Action):
         print(f"result: {result}")
 
         message = (
-        f"Hello,\n\n"
-        "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance.\n\n"
+        f"Hello,\n \n"
+        "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance.\n \n"
         "🔍 Here's the information About you:\n"
         f"👤 *Username:* {result['username']}\n"
         f"📧 *Email:* {result['email']}\n"
@@ -1048,18 +1047,16 @@ class ActionSubmitUserDetailsForm(Action):
         )
 
         buttons = [
-            {"title": "Update Username", "payload" : "/update_username_details"},
-            {"title": "Update Email", "payload" : "/update_email_details"},
-            {"title": "Update Age", "payload" : "/update_age_details"},
-            {"title": "Update Income", "payload" : "/update_income_details"},
+            {"title": "Update", "payload": '/update_user_details'},
+            {"title": "Confirm", "payload": '/confirm_user_details'}
         ]
         dispatcher.utter_message(text=message, buttons=buttons)
         return [
-            SlotSet('name', None),
-            SlotSet('email', None),
-            SlotSet('age', None),
-            SlotSet('phone_number', None),
-            SlotSet('income', None)
+            # SlotSet('name', None),
+            # SlotSet('email', None),
+            # SlotSet('age', None),
+            # SlotSet('phone_number', None),
+            # SlotSet('income', None)
         ]
 
 
@@ -1067,19 +1064,22 @@ class ActionGetAllUser(Action):
     def name(self) -> Text:
         return "action_get_all_user"
 
-
     def run(self, dispatcher: CollectingDispatcher,
                   tracker: Tracker,
                   domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         user_data = fetch_all_user_data()
         buttons = [
-                {"title": "Main Menu", "payload": '/select_menu_item'}
+            {"title": "Renew Policy", "payload": '/renew_policy'},
+            {"title": "Claims Related", "payload": '/claims_related'},
+            {"title": "Download Policy Copy", "payload": '/download_policy'},
+            {"title": "Emergengy Support", "payload": '/emergency_support'},
+            {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+            {"title": "New Policy", "payload": '/new_policy'},
+            {"title": "Health Policy", "payload": '/health_policy'},
+            {"title": "User Details", "payload": '/user_details'}
         ]
         max_message_length = 1500
         if user_data:
-            # buttons = [
-            #     {"title": "Main Menu", "payload": '/select_menu_item'}
-            #     ]
             user_details_message = "User Details:\n"
             for user in user_data:
                 user_details_message += (

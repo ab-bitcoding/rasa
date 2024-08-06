@@ -95,6 +95,21 @@ nlu:
     - Provide health policy updates
     - I am interested in health policy news
 
+- intent: confirm_user_details
+  examples: |
+    - Yes, the provided information is correct.
+    - The details you've provided are accurate.
+    - I confirm that my details are correct.
+    - All the information is accurate.
+    - Everything looks good. Please proceed.
+    - My details are correct, no changes needed.
+    - The provided information is accurate, please proceed.
+    - I confirm the accuracy of my data.
+    - All details are correct.
+    - The information provided is correct and up-to-date.
+    - confirm your user data
+    - confirm
+
 - intent: add_user
   examples: |
     - I want to add a user

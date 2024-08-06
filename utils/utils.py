@@ -24,7 +24,7 @@ def create_user(payload: Dict[str, any]) -> Dict[str, any]:
     """
     if not API_BASE_URL:
         raise ValueError("API_BASE_URL environment variable is not set.")
-    
+
     url = f"{API_BASE_URL}/user"
 
     try:
@@ -39,7 +39,7 @@ def fetch_all_user_data() -> Dict[Text, Any]:
 
     if not API_BASE_URL:
         raise ValueError("API_BASE_URL environment variable is not set.")
-    
+
     url = f"{API_BASE_URL}/all_users"
     response = requests.get(url)
     if response.status_code == 200:
@@ -59,7 +59,6 @@ def fetch_user_data(phone_number: str) -> Dict[str, Any]:
     except requests.exceptions.RequestException as e:
         print(f"API request failed: {e}")
         return {}
-
 
 def update_user_details(phone_number: str, payload: dict) -> dict:
     """

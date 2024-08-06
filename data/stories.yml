@@ -1,10 +1,6 @@
 version: "3.1"
 
 stories:
-- story: Greet
-  steps:
-    - intent: greet
-    - action: action_greet_user
 
 - story: Select Language
   steps:
@@ -31,12 +27,3 @@ stories:
     - intent: get_all_user
     - action: action_get_all_user
 
-- story: Confirm User Data
-  steps:
-    - intent: confirm_user_details
-    - action: action_confirm_user_details
-
-- story: Update User Details
-  steps:
-    - intent: update_user_details
-    - action: action_update_user_details
