@@ -583,11 +583,13 @@ class ActionUpdateAgeDetails(Action):
             domain:Dict[Text,Any])-> List[Dict[Text, Any]]:
         
         phone_number = tracker.get_slot('phone_number')
-        age = tracker.get_slot("age")
 
         if phone_number:
-                dispatcher.utter_message(text=f"Your 🎂 *Age*: *{age}* \n \n Please provide the new age:")
-                return []
+                user_data = fetch_user_data(phone_number)
+                if user_data:
+                    age = user_data.get('age')
+                    dispatcher.utter_message(text=f"Your 🎂 *Age*: *{age}* \n \n Please provide the new age:")
+                    return []
 
 
 class ValidateUpdateAgeDetailsForm(FormValidationAction):
@@ -601,14 +603,27 @@ class ValidateUpdateAgeDetailsForm(FormValidationAction):
             domain:Dict[Text, Any]) -> List[Dict[Text,Any]]:
         
         phone_number = tracker.get_slot('phone_number')
+        update_age = tracker.get_slot('update_age').strip()
+
+        print(f"update_age: {update_age}")
+
         if phone_number:
-            update_age = tracker.get_slot('update_age').strip()
+            failed_attempts = tracker.get_slot('failed_attempts') or 0
 
             if update_age.isdigit() and 0 < int(update_age) <= 120:
                 return {"update_age": update_age}
             else:
-                dispatcher.utter_message(text="Please enter a valid age.")
-            return {"update_age": None}
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_update_age = {"update_age" :"fallback","failed_attempts": None}
+                    print(f"get_update_age: {get_update_age}")
+                    return get_update_age
+                else:
+                    dispatcher.utter_message(text="Please enter a valid age.")
+                    attemps_value = {"failed_attempts": failed_attempts,"update_age": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
+
 
 
 class SubmitUpdateAgeDetailsForm(Action):
@@ -623,35 +638,62 @@ class SubmitUpdateAgeDetailsForm(Action):
 
         phone_number = tracker.get_slot("phone_number")
         if phone_number:
-            updated_age = tracker.get_slot('update_age')
-            print(f"updated_age: {updated_age}")
-            ## Call the Update API
-            payload = {
-                "age":updated_age
-            }
-            user_data = update_user_details(phone_number, payload)
-            name = user_data.get('username', '')
-            email = user_data.get('email', '')
-            age = user_data.get('age', '')
-            phone_number = user_data.get('phone_number', '')
-            income = user_data.get('income', '')
-            message = (
-                "Hello,\n \n"
-                "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
-                "🔍 Here's the *Updated* information about you: \n"
-                f"👤 *Username:* {name}\n"
-                f"📧 *Email:* {email}\n"
-                f"🎂 *Age:* {age}\n"
-                f"📞 *Phone Number:* {phone_number}\n"
-                f"💼 *Income:* {income}\n"
-            )
-            buttons = [
-                {"title": "Update", "payload": '/update_user_details'},
-                {"title": "Confirm", "payload": '/confirm_user_details'}
-            ]
-            dispatcher.utter_message(text=message, buttons=buttons)
-            empty_update_age_slot = SlotSet("update_age", None)
-            return [empty_update_age_slot]
+            update_age = tracker.get_slot('update_age')
+            print(f"update_age: {update_age}")
+            if update_age == "fallback":
+                user_data = fetch_user_data(phone_number)
+
+                if user_data:
+                    username = user_data.get('username')
+                    email = user_data.get('email') 
+                    age = user_data.get('age')
+                    income = user_data.get('income')
+
+                    message = (
+                    "Having trouble updating the data? 🔄 Use the *Update* and *Confirm* button. Let us know if you need help. 🤝 \n \n"
+                    "🔍 Here's the information About you:\n"
+                    f"👤 *Username:* {username} \n"
+                    f"📧 *Email:* {email} \n"
+                    f"🎂 *Age:* {age} \n"
+                    f"📞 *Phone Number:* {phone_number} \n"
+                    f"💼 *Income:* {income} \n"
+                    )
+                    buttons = [
+                        {"title": "Update", "payload": '/update_user_details'},
+                        {"title": "Confirm", "payload": '/confirm_user_details'}
+                    ]
+
+                    dispatcher.utter_message(text=message, buttons=buttons) 
+                    return [SlotSet("update_age", None)]
+
+            else:
+                ## Call the Update API
+                payload = {
+                    "age":update_age
+                }
+                user_data = update_user_details(phone_number, payload)
+                name = user_data.get('username', '')
+                email = user_data.get('email', '')
+                age = user_data.get('age', '')
+                phone_number = user_data.get('phone_number', '')
+                income = user_data.get('income', '')
+                message = (
+                    "Hello,\n \n"
+                    "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
+                    "🔍 Here's the *Updated* information about you: \n"
+                    f"👤 *Username:* {name}\n"
+                    f"📧 *Email:* {email}\n"
+                    f"🎂 *Age:* {age}\n"
+                    f"📞 *Phone Number:* {phone_number}\n"
+                    f"💼 *Income:* {income}\n"
+                )
+                buttons = [
+                    {"title": "Update", "payload": '/update_user_details'},
+                    {"title": "Confirm", "payload": '/confirm_user_details'}
+                ]
+                dispatcher.utter_message(text=message, buttons=buttons)
+                empty_update_age_slot = SlotSet("update_age", None)
+                return [empty_update_age_slot]
 
 
 class ActionUpdateIncomeDetails(Action):
