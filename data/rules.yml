@@ -12,6 +12,16 @@ rules:
   - intent: greet
   - action: action_greet_user
 
+- rule: User Details
+  steps:
+    - intent: user_details
+    - action: action_user_details
+
+- rule: Select Language
+  steps:
+    - intent: select_language
+    - action: action_select_language
+
 - rule: Confirm User Data
   steps:
     - intent: confirm_user_details

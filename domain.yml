@@ -3,7 +3,6 @@ version: "3.1"
 intents:
   - greet
   - select_language
-  - select_menu_item
   - renew_policy
   - emergency_support
   - user_details
@@ -211,7 +210,6 @@ responses:
 actions:
   - action_greet_user
   - action_select_language
-  - action_menu_list
   - action_renew_policy
   - action_near_by_workshop
   - action_emergency_support
