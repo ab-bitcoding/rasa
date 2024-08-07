@@ -459,11 +459,13 @@ class ActionUpdateEmailDetails(Action):
             domain:Dict[Text,Any])-> List[Dict[Text, Any]]:
         
         phone_number = tracker.get_slot('phone_number')
-        email = tracker.get_slot("email")
 
         if phone_number:
-                dispatcher.utter_message(text=f"Your 📧 *email*: *{email}* \n \n Please provide the new email address:")
-                return []
+                user_data = fetch_user_data(phone_number)
+                if user_data:
+                    email = user_data.get('email')
+                    dispatcher.utter_message(text=f"Your 📧 *email*: *{email}* \n \n Please provide the new email address:")
+                    return []
 
 
 class ValidateUpdateEmailDetailsForm(FormValidationAction):
@@ -477,14 +479,25 @@ class ValidateUpdateEmailDetailsForm(FormValidationAction):
             domain:Dict[Text, Any]) -> List[Dict[Text,Any]]:
         
         phone_number = tracker.get_slot('phone_number')
-        if phone_number:
-            update_email = tracker.get_slot('update_email').strip().lower()
+        update_email = tracker.get_slot('update_email').strip().lower()
 
+        print(f"update_email_value: {update_email}")
+
+        if phone_number:
+            failed_attempts = tracker.get_slot('failed_attempts') or 0
             if "@" in update_email and "." in update_email and len(update_email) > 7:
                 return {"update_email": update_email}
             else:
-                dispatcher.utter_message(text="Please enter a valid email address.")
-            return {"update_email": None}
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_update_email = {"update_email" :"fallback","failed_attempts": None}
+                    print(f"get_update_email::::{get_update_email}")
+                    return get_update_email
+                else:
+                    dispatcher.utter_message(text="Please enter a valid email.")
+                    attemps_value = {"failed_attempts": failed_attempts,"update_email": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
 
 
 class SubmitUpdateEmailDetailsForm(Action):
@@ -498,37 +511,66 @@ class SubmitUpdateEmailDetailsForm(Action):
         ) -> List[Dict[Text, Any]]:
 
         phone_number = tracker.get_slot("phone_number")
-        updated_email = tracker.get_slot('update_email').lower()
+        update_email = tracker.get_slot('update_email').lower()
+
         if phone_number:
-            updated_email = re.sub(r'\s+', '', updated_email)
-            print(f"updated_email: {updated_email}")
-            ## Call the Update API
-            payload = {
-                "email":updated_email
-            }
-            user_data = update_user_details(phone_number, payload)
-            name = user_data.get('username', '')
-            email = user_data.get('email', '')
-            age = user_data.get('age', '')
-            phone_number = user_data.get('phone_number', '')
-            income = user_data.get('income', '')
-            message = (
-                "Hello,\n \n"
-                "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
-                "🔍 Here's the *Updated* information about you: \n"
-                f"👤 *Username:* {name}\n"
-                f"📧 *Email:* {email}\n"
-                f"🎂 *Age:* {age}\n"
-                f"📞 *Phone Number:* {phone_number}\n"
-                f"💼 *Income:* {income}\n"
-            )
-            buttons = [
-                {"title": "Update", "payload": '/update_user_details'},
-                {"title": "Confirm", "payload": '/confirm_user_details'}
-            ]
-            dispatcher.utter_message(text=message, buttons=buttons)
-            empty_update_email_slot = SlotSet("update_email", None)
-            return [empty_update_email_slot]
+            update_email = re.sub(r'\s+', '', update_email)
+            print(f"updated_email: {update_email}")
+
+            if update_email == "fallback":
+                user_data = fetch_user_data(phone_number)
+
+                if user_data:
+                    username = user_data.get('username')
+                    email = user_data.get('email') 
+                    age = user_data.get('age')
+                    income = user_data.get('income')
+
+                    message = (
+                    "Having trouble updating the data? 🔄 Use the *Update* and *Confirm* button. Let us know if you need help. 🤝 \n \n"
+                    "🔍 Here's the information About you:\n"
+                    f"👤 *Username:* {username} \n"
+                    f"📧 *Email:* {email} \n"
+                    f"🎂 *Age:* {age} \n"
+                    f"📞 *Phone Number:* {phone_number} \n"
+                    f"💼 *Income:* {income} \n"
+                    )
+                    buttons = [
+                        {"title": "Update", "payload": '/update_user_details'},
+                        {"title": "Confirm", "payload": '/confirm_user_details'}
+                    ]
+
+                    dispatcher.utter_message(text=message, buttons=buttons) 
+                    return [SlotSet("update_email", None)]
+
+            else:
+                ## Call the Update API
+                payload = {
+                    "email":update_email
+                }
+                user_data = update_user_details(phone_number, payload)
+                name = user_data.get('username', '')
+                email = user_data.get('email', '')
+                age = user_data.get('age', '')
+                phone_number = user_data.get('phone_number', '')
+                income = user_data.get('income', '')
+                message = (
+                    "Hello,\n \n"
+                    "👋 I'm VISoF Buddy, your trusted WhatsApp Insurance Assistant. I'm here to help you with all your insurance needs and provide you with the best assistance. \n \n"
+                    "🔍 Here's the *Updated* information about you: \n"
+                    f"👤 *Username:* {name}\n"
+                    f"📧 *Email:* {email}\n"
+                    f"🎂 *Age:* {age}\n"
+                    f"📞 *Phone Number:* {phone_number}\n"
+                    f"💼 *Income:* {income}\n"
+                )
+                buttons = [
+                    {"title": "Update", "payload": '/update_user_details'},
+                    {"title": "Confirm", "payload": '/confirm_user_details'}
+                ]
+                dispatcher.utter_message(text=message, buttons=buttons)
+                empty_update_email_slot = SlotSet("update_email", None)
+                return [empty_update_email_slot]
 
 
 class ActionUpdateAgeDetails(Action):
