@@ -41,22 +41,6 @@ nlu:
     - pick your language
     - set language
 
-- intent: select_menu_item
-  examples: |
-    - I want to choose a menu item
-    - choose menu item
-    - select menu item
-    - pick a menu item
-    - I want to pick a menu item
-    - choose an item from the menu
-    - select an item from the menu
-    - pick an item from the menu
-    - I'd like to choose a menu item
-    - I'd like to select a menu item
-    - I'd like to pick a menu item
-    - let me choose a menu item
-    - let me pick a menu item
-
 - intent: emergency_support
   examples: |
     - I need emergency support

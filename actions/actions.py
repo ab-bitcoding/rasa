@@ -8,8 +8,10 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet, FollowupAction, AllSlotsReset
 from rasa_sdk.types import DomainDict
 from utils.utils import create_user, fetch_user_data, fetch_all_user_data, update_user_details
+from utils.support_function import get_main_menu_buttons
 
 load_dotenv()
+
 
 class ActionGreetUser(Action):
     def name(self) -> Text:
@@ -25,12 +27,6 @@ class ActionGreetUser(Action):
         user_phone_number = metadata.get("sender")
         print(f"greet user_phone_number: {user_phone_number}")
 
-        # location = metadata.get("location")
-        # longitude = metadata.get("longitude")
-
-        # print(f"location: {location}")
-        # print(f"longitude: {longitude}")
-
         if user_phone_number:
             user_data = fetch_user_data(user_phone_number)
             if user_data:
@@ -39,7 +35,6 @@ class ActionGreetUser(Action):
                 message = (
                     f"Hi *{name}*,\n \n"
                     "I am Liberty Buddy, Your WhatsApp Insurance Assistant.\n \n"
-                    # "Your %{mmv} Insurance Policy (Policy No: %{policy_no}*) is valid till %{policyExpiryDate}.\n \n"
                     "Let's get started with your renewal, claims, or any other insurance-related support.\n \n"
                     "Please select your language."
                 )
@@ -67,36 +62,6 @@ class ActionGreetUser(Action):
                 ]
                 dispatcher.utter_message(text=message, buttons=buttons)
                 return [SlotSet("phone_number", user_phone_number)]
-
-
-class ActionConfirmUserDetails(Action):
-    def name(self) -> Text:
-        return "action_confirm_user_details"
-    
-    def run(self,
-            dispatcher:CollectingDispatcher,
-            tracker:Tracker,
-            domain: Dict[Text, Any]) -> List[Dict[Text,Any]]:
-        
-        phone_number = tracker.get_slot("phone_number")
-        user_name = tracker.get_slot("name")
-        if phone_number:
-            message = (
-                "Need help with renewal, claims or any other insurance-related support. \n \n"
-                "Click on *Main Menu*"
-            )
-            buttons = [
-                {"title": "Renew Policy", "payload": '/renew_policy'},
-                {"title": "Claims Related", "payload": '/claims_related'},
-                {"title": "Download Policy Copy", "payload": '/download_policy'},
-                {"title": "Emergengy Support", "payload": '/emergency_support'},
-                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
-                {"title": "New Policy", "payload": '/new_policy'},
-                {"title": "Health Policy", "payload": '/health_policy'},
-                {"title": "User Details", "payload": '/user_details'}
-            ]
-            dispatcher.utter_message(text=message, buttons=buttons)
-            return []
 
 
 class ActionSelectLanguage(Action):
@@ -161,6 +126,133 @@ class ActionEmergencySupport(Action):
             return []
 
 
+class ValidateEmergencySupportPincodeForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_emergency_support_pincode_form"
+
+    def validate_pincode(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any]
+    ) -> List[Dict[Text, Any]]:
+        emergency_pincode = tracker.get_slot('pincode')
+        latitude = tracker.get_slot('latitude')
+        longitude = tracker.get_slot('longitude')
+
+        print(f"emergency_pincode: {emergency_pincode}")
+        print(f"latitude: {latitude}")
+        print(f"longitude: {longitude}")
+
+        failed_attempts = tracker.get_slot('failed_attempts') or 0
+
+        if None not in (latitude, longitude):
+            if -180 <= float(latitude) <= 180 and -180 <= float(longitude) <= 180:
+                print("Inside match if Condition")
+                set_latitude_and_longitude_slot = {"latitude": latitude, "longitude": longitude}
+                print(f"set_latitude_and_longitude_slot: {set_latitude_and_longitude_slot}")
+                return set_latitude_and_longitude_slot
+            else:
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_update_latitude_longitude = {"latitude" :"fallback","longitude" :"fallback","failed_attempts": None}
+                    print(f"get_update_latitude_longitude: {get_update_latitude_longitude}")
+                    return get_update_latitude_longitude
+                else:
+                    dispatcher.utter_message(text="The provided location coordinates are invalid.")
+                    attemps_value = {"failed_attempts": failed_attempts,"latitude": None, "longitude": None, "pincode": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
+        else:
+            if emergency_pincode and len(emergency_pincode) == 6 and emergency_pincode.isdigit():
+                print("Inside Validate pincode if Condition")
+
+                set_pincode_slot = {"pincode": emergency_pincode}
+                print(f"set_pincode_slot: {set_pincode_slot}")
+                return set_pincode_slot
+            else:
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_pincode = {"pincode" :"fallback", "failed_attempts": None}
+                    print(f"get_pincode: {get_pincode}")
+                    return get_pincode
+                else:
+                    dispatcher.utter_message(text="Looks like the pincode is invalid. Please enter a valid 6-digit pincode or share your current location.")
+                    attemps_value = {"failed_attempts": failed_attempts, "pincode": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
+
+
+class ActionSubmitEmergencyPincodeForm(Action):
+    def name(self) -> Text:
+        return "action_submit_emergency_support_pincode_form"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: "DomainDict") -> List[Dict[Text, Any]]:
+
+        emergency_pincode = tracker.get_slot("pincode")
+        latitude = tracker.get_slot("latitude")
+        longitude = tracker.get_slot("longitude")
+        print("emergency_pincode::::",emergency_pincode)
+
+        if emergency_pincode == "fallback" or (latitude,longitude) == ("fallback","fallback"):
+            message = (
+                "Need help with renewal, claims or any other insurance-related support. \n \n"
+                "Click on *Main Menu*"
+            )
+            buttons = get_main_menu_buttons()
+            # buttons = [
+            #     {"title": "Renew Policy", "payload": '/renew_policy'},
+            #     {"title": "Claims Related", "payload": '/claims_related'},
+            #     {"title": "Download Policy Copy", "payload": '/download_policy'},
+            #     {"title": "Emergengy Support", "payload": '/emergency_support'},
+            #     {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+            #     {"title": "New Policy", "payload": '/new_policy'},
+            #     {"title": "Health Policy", "payload": '/health_policy'},
+            #     {"title": "User Details", "payload": '/user_details'}
+            # ]
+            dispatcher.utter_message(text=message, buttons=buttons)
+            return [
+                SlotSet("pincode", None),
+                SlotSet("latitude", None),
+                SlotSet("longitude", None),
+                SlotSet("failed_attempts", None)
+            ]
+        else:
+            message = (
+                "Great! We found 1 Garage near you. Given below are the details of workshops: \n \n"
+                "*Superon* \n"
+                "Tele No: 9876543211 \n \n"
+                "*Safdarjang* \n"
+                "Tele No: 8765432123 \n \n"
+                "Click the link below to view garages on the map: \n"
+                "https://dxa2.jcowk/oxwo=jcwojcown \n \n"
+                "If you require any assistance, \n \n"
+                "Call - *1800XXXXXXXXX* \n"
+                "Missed call and get a callback: \n"
+                "9876543211"
+            )
+            buttons = [
+                {"title": "Renew Policy", "payload": '/renew_policy'},
+                {"title": "Claims Related", "payload": '/claims_related'},
+                {"title": "Download Policy Copy", "payload": '/download_policy'},
+                {"title": "Emergengy Support", "payload": '/emergency_support'},
+                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+                {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'},
+                {"title": "User Details", "payload": '/user_details'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
+            return [
+                SlotSet("pincode", None),
+                SlotSet("latitude", None),
+                SlotSet("longitude", None),
+                SlotSet("failed_attempts", None)
+            ]
+
+
 class ActionNearByWorkshop(Action):
     def name(self) -> Text:
         return "action_near_by_workshop"
@@ -176,6 +268,129 @@ class ActionNearByWorkshop(Action):
 
         dispatcher.utter_message(text=message)
         return []
+
+
+class ValidateNearByWorkshopPincodeForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_near_by_workshop_pincode_form"
+    
+    def validate_pincode(
+            self,
+            slot_value:Any,
+            dispatcher: CollectingDispatcher,
+            tracker:Tracker,
+            domain:Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        pincode = tracker.get_slot('pincode')
+        latitude = tracker.get_slot('latitude')
+        longitude = tracker.get_slot('longitude')
+        failed_attempts = tracker.get_slot('failed_attempts') or 0
+
+
+        if None not in (latitude, longitude):
+            if -180 <= float(latitude) <= 180 and -180 <= float(longitude) <= 180:
+                print("Inside match if Condition")
+                set_latitude_and_longitude_slot = {"latitude": latitude, "longitude": longitude}
+                print(f"set_latitude_and_longitude_slot: {set_latitude_and_longitude_slot}")
+                return set_latitude_and_longitude_slot
+            else:
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_update_latitude_longitude = {"latitude" :"fallback","longitude" :"fallback","failed_attempts": None}
+                    print(f"get_update_latitude_longitude: {get_update_latitude_longitude}")
+                    return get_update_latitude_longitude
+                else:
+                    dispatcher.utter_message(text="The provided location coordinates are invalid.")
+                    attemps_value = {"failed_attempts": failed_attempts,"latitude": None, "longitude": None, "pincode": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
+        else:
+            if pincode and len(pincode) == 6 and pincode.isdigit():
+                print("Inside Validate pincode if Condition")
+
+                set_pincode_slot = {"pincode": pincode}
+                print(f"set_pincode_slot: {set_pincode_slot}")
+                return set_pincode_slot
+            else:
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_pincode = {"pincode" :"fallback", "failed_attempts": None}
+                    print(f"get_pincode: {get_pincode}")
+                    return get_pincode
+                else:
+                    dispatcher.utter_message(text="Looks like the pincode is invalid. Please enter a valid 6-digit pincode or share your current location.")
+                    attemps_value = {"failed_attempts": failed_attempts, "pincode": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
+
+
+class ActionSubmitNearByWorkshopPincodeForm(Action):
+    def name(self) -> Text:
+        return "action_submit_near_by_workshop_pincode_form"
+    
+    def run(
+            self,
+            dispatcher:CollectingDispatcher,
+            tracker:Tracker,
+            domain: DomainDict) -> List[Dict[Text, Any]]:
+
+        pincode = tracker.get_slot('pincode')
+        latitude = tracker.get_slot('latitude')
+        longitude = tracker.get_slot('longitude')
+        if pincode == "fallback" or (latitude,longitude) == ("fallback","fallback"):
+            message = (
+                "Need help with renewal, claims or any other insurance-related support. \n \n"
+                "Click on *Main Menu*"
+            )
+            buttons = [
+                {"title": "Renew Policy", "payload": '/renew_policy'},
+                {"title": "Claims Related", "payload": '/claims_related'},
+                {"title": "Download Policy Copy", "payload": '/download_policy'},
+                {"title": "Emergengy Support", "payload": '/emergency_support'},
+                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+                {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'},
+                {"title": "User Details", "payload": '/user_details'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
+            return [
+                SlotSet("pincode", None),
+                SlotSet("latitude", None),
+                SlotSet("longitude", None),
+                SlotSet("failed_attempts", None)
+            ]
+        else:
+            
+            message = (
+                "Great! We found 1 Garage near you. Given below are the details of workshops: \n \n"
+                "*Superon* \n"
+                "Tele No: 9876543211 \n \n"
+                "*Safdarjang* \n"
+                "Tele No : 8765432123 \n \n"
+                "Click the link below to view garages on the map: \n"
+                "https://dxa2.jcowk/oxwo=jcwojcown \n \n"
+                "If you require any assistance, \n \n"
+                "Call - *1800XXXXXXXXX* \n"
+                "Missed call and get a callback: \n"
+                "9876543211"
+            )
+            buttons = [
+                {"title": "Renew Policy", "payload": '/renew_policy'},
+                {"title": "Claims Related", "payload": '/claims_related'},
+                {"title": "Download Policy Copy", "payload": '/download_policy'},
+                {"title": "Emergengy Support", "payload": '/emergency_support'},
+                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+                {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'},
+                {"title": "User Details", "payload": '/user_details'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
+            return [
+                SlotSet("pincode", None),
+                SlotSet("latitude", None),
+                SlotSet("longitude", None),
+                SlotSet("failed_attempts", None)
+            ]
 
 
 class ActionRenewPolicy(Action):
@@ -215,6 +430,146 @@ class ActionHealthPolicy(Action):
         )
         dispatcher.utter_message(text=message)
         return []
+
+
+class ValidateHealthPolicyForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_health_policy_form"
+
+    def validate_name(self,
+                      slot_value:Any,
+                      dispatcher:CollectingDispatcher,
+                      tracker: Tracker,
+                      domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+
+        name = tracker.get_slot('name').lower()
+        print(f"This is name: {name}")
+        if name.replace(" ", "").isalpha() and len(name) > 1:
+            dispatcher.utter_message(text="Thanks! Now, could you please provide your email?")
+            return {"name": name}
+        else:
+            dispatcher.utter_message(text="Please enter a valid name.")
+            return {"name": None}
+
+    def validate_email(self,
+                       slot_value:Any,
+                      dispatcher:CollectingDispatcher,
+                      tracker: Tracker,
+                      domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+        
+
+        get_email = tracker.get_slot('email').strip().lower()
+        email = re.sub(r'\s+', '', get_email)
+        print(f"This is email: {email}")
+        if "@" in email and "." in email and len(email) > 7:
+            dispatcher.utter_message(text="Thanks! Now, could you please provide your age?")
+            return {"email": email}
+        else:
+            dispatcher.utter_message(text="Please enter a valid email address.")
+            return {"email": None}
+        
+
+    def validate_age(self,
+                    slot_value:Any,
+                    dispatcher:CollectingDispatcher,
+                    tracker: Tracker,
+                    domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+
+        age  = tracker.get_slot('age')
+        print(f"This is age: {age}")
+        if age and 0 < int(age) <= 120:
+            dispatcher.utter_message(text="Thanks! Now, could you please provide your Phone Number?") 
+            return {"age": age}
+        else:
+            dispatcher.utter_message(text="Please enter a valid age")
+            return {"age": None}
+
+    def validate_phone_number(self,
+                    slot_value: Any,
+                    dispatcher:CollectingDispatcher,
+                    tracker: Tracker,
+                    domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+
+        phone_number = tracker.get_slot('phone_number')
+        print(f"This is Phone Number: {phone_number}")
+        if phone_number.isdigit() and len(phone_number) <= 15:
+            dispatcher.utter_message(text="Thanks! Now, could you please provide your Income?") 
+            return {"phone_number": phone_number}
+        else:
+            dispatcher.utter_message(text="Please enter a valid phone number")
+            return {"phone_number": None}
+
+    def validate_income(self,
+                    slot_value:Any,
+                    dispatcher:CollectingDispatcher,
+                    tracker: Tracker,
+                    domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
+
+        income = tracker.get_slot('income')
+        print(f"This is Income: {income}")
+        try:
+            income_value = float(income)
+            if income_value > 0:
+                return {"income": income}
+            else: 
+                dispatcher.utter_message(text="Please enter a valid income")
+                return {"income": None}
+        except ValueError:
+            dispatcher.utter_message(text="Please enter a valid numeric income.")
+            return {"income": None}
+
+
+class ActionSubmitHealthPolicyForm(Action):
+    def name(self) -> Text:
+        return "action_submit_health_policy_form"
+    
+    def run(self,
+            dispatcher: CollectingDispatcher,
+            tracker:Tracker,
+            domain:Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        name = tracker.get_slot('name')
+        email = tracker.get_slot('email')
+        age = tracker.get_slot('age')
+        phone_number = tracker.get_slot('phone_number')
+        income = tracker.get_slot('income')
+        
+        payload = {
+            "username": name,
+            "email": email,
+            "age": age,
+            "phone_number": phone_number,
+            "income": income
+        }
+        try:
+            result = create_user(payload)
+            message = (
+                "🔍 Here's the information About you:\n"
+                f"👤 *Username:* {result['username']}\n"
+                f"📧 *Email:* {result['email']}\n"
+                f"🎂 *Age:* {result['age']}\n"
+                f"📞 *Phone Number:* {result['phone_number']}\n"
+                f"💼 *Income:* {result['income']}\n"
+            )
+            buttons = [
+                {"title": "Renew Policy", "payload": '/renew_policy'},
+                {"title": "Claims Related", "payload": '/claims_related'},
+                {"title": "Download Policy Copy", "payload": '/download_policy'},
+                {"title": "Emergengy Support", "payload": '/emergency_support'},
+                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+                {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'},
+                {"title": "User Details", "payload": '/user_details'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
+        except requests.exceptions.RequestException as e:
+            dispatcher.utter_message(text=f"Failed to submit form: {str(e)}")
+        return [
+            SlotSet('name', None),
+            SlotSet('email', None),
+            SlotSet('age', None),
+            SlotSet('phone_number', None),
+            SlotSet('income', None)
+        ]
 
 
 class ActionUserDetails(Action):
@@ -308,6 +663,36 @@ class ActionUpdateUserDetails(Action):
             ]
             dispatcher.utter_message(text=message, buttons=buttons)
 
+            return []
+
+
+class ActionConfirmUserDetails(Action):
+    def name(self) -> Text:
+        return "action_confirm_user_details"
+    
+    def run(self,
+            dispatcher:CollectingDispatcher,
+            tracker:Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text,Any]]:
+        
+        phone_number = tracker.get_slot("phone_number")
+        user_name = tracker.get_slot("name")
+        if phone_number:
+            message = (
+                "Need help with renewal, claims or any other insurance-related support. \n \n"
+                "Click on *Main Menu*"
+            )
+            buttons = [
+                {"title": "Renew Policy", "payload": '/renew_policy'},
+                {"title": "Claims Related", "payload": '/claims_related'},
+                {"title": "Download Policy Copy", "payload": '/download_policy'},
+                {"title": "Emergengy Support", "payload": '/emergency_support'},
+                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+                {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'},
+                {"title": "User Details", "payload": '/user_details'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
             return []
 
 
@@ -802,206 +1187,6 @@ class SubmitUpdateIncomeDetailsForm(Action):
                 return [empty_update_income_slot]
 
 
-class ValidateEmergencySupportPincodeForm(FormValidationAction):
-    def name(self) -> Text:
-        return "validate_emergency_support_pincode_form"
-
-    def validate_pincode(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any]
-    ) -> List[Dict[Text, Any]]:
-        emergency_pincode = tracker.get_slot('pincode')
-        latitude = tracker.get_slot('latitude')
-        longitude = tracker.get_slot('longitude')
-
-        print(f"emergency_pincode: {emergency_pincode}")
-        print(f"latitude: {latitude}")
-        print(f"longitude: {longitude}")
-
-        failed_attempts = tracker.get_slot('failed_attempts') or 0
-
-        if None not in (latitude, longitude):
-            if -180 <= float(latitude) <= 180 and -180 <= float(longitude) <= 180:
-                print("Inside match if Condition")
-                set_latitude_and_longitude_slot = {"latitude": latitude, "longitude": longitude}
-                print(f"set_latitude_and_longitude_slot: {set_latitude_and_longitude_slot}")
-                return set_latitude_and_longitude_slot
-            else:
-                failed_attempts = failed_attempts + 1
-                if failed_attempts == 3:
-                    get_update_latitude_longitude = {"latitude" :"fallback","longitude" :"fallback","failed_attempts": None}
-                    print(f"get_update_latitude_longitude: {get_update_latitude_longitude}")
-                    return get_update_latitude_longitude
-                else:
-                    dispatcher.utter_message(text="The provided location coordinates are invalid.")
-                    attemps_value = {"failed_attempts": failed_attempts,"latitude": None, "longitude": None, "pincode": None}
-                    print(f"failed_attemps_value: {attemps_value}")
-                    return attemps_value
-        else:
-            if emergency_pincode and len(emergency_pincode) == 6 and emergency_pincode.isdigit():
-                print("Inside Validate pincode if Condition")
-
-                set_pincode_slot = {"pincode": emergency_pincode}
-                print(f"set_pincode_slot: {set_pincode_slot}")
-                return set_pincode_slot
-            else:
-                failed_attempts = failed_attempts + 1
-                if failed_attempts == 3:
-                    get_pincode = {"pincode" :"fallback", "failed_attempts": None}
-                    print(f"get_pincode: {get_pincode}")
-                    return get_pincode
-                else:
-                    dispatcher.utter_message(text="Looks like the pincode is invalid. Please enter a valid 6-digit pincode or share your current location.")
-                    attemps_value = {"failed_attempts": failed_attempts, "pincode": None}
-                    print(f"failed_attemps_value: {attemps_value}")
-                    return attemps_value
-
-
-class ValidateNearByWorkshopPincodeForm(FormValidationAction):
-    def name(self) -> Text:
-        return "validate_near_by_workshop_pincode_form"
-    
-    def validate_pincode(
-            self,
-            slot_value:Any,
-            dispatcher: CollectingDispatcher,
-            tracker:Tracker,
-            domain:Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
-        pincode = tracker.get_slot('pincode')
-        latitude = tracker.get_slot('latitude')
-        longitude = tracker.get_slot('longitude')
-        failed_attempts = tracker.get_slot('failed_attempts') or 0
-
-
-        if None not in (latitude, longitude):
-            if -180 <= float(latitude) <= 180 and -180 <= float(longitude) <= 180:
-                print("Inside match if Condition")
-                set_latitude_and_longitude_slot = {"latitude": latitude, "longitude": longitude}
-                print(f"set_latitude_and_longitude_slot: {set_latitude_and_longitude_slot}")
-                return set_latitude_and_longitude_slot
-            else:
-                failed_attempts = failed_attempts + 1
-                if failed_attempts == 3:
-                    get_update_latitude_longitude = {"latitude" :"fallback","longitude" :"fallback","failed_attempts": None}
-                    print(f"get_update_latitude_longitude: {get_update_latitude_longitude}")
-                    return get_update_latitude_longitude
-                else:
-                    dispatcher.utter_message(text="The provided location coordinates are invalid.")
-                    attemps_value = {"failed_attempts": failed_attempts,"latitude": None, "longitude": None, "pincode": None}
-                    print(f"failed_attemps_value: {attemps_value}")
-                    return attemps_value
-        else:
-            if pincode and len(pincode) == 6 and pincode.isdigit():
-                print("Inside Validate pincode if Condition")
-
-                set_pincode_slot = {"pincode": pincode}
-                print(f"set_pincode_slot: {set_pincode_slot}")
-                return set_pincode_slot
-            else:
-                failed_attempts = failed_attempts + 1
-                if failed_attempts == 3:
-                    get_pincode = {"pincode" :"fallback", "failed_attempts": None}
-                    print(f"get_pincode: {get_pincode}")
-                    return get_pincode
-                else:
-                    dispatcher.utter_message(text="Looks like the pincode is invalid. Please enter a valid 6-digit pincode or share your current location.")
-                    attemps_value = {"failed_attempts": failed_attempts, "pincode": None}
-                    print(f"failed_attemps_value: {attemps_value}")
-                    return attemps_value
-
-            
-
-class ValidateHealthPolicyForm(FormValidationAction):
-    def name(self) -> Text:
-        return "validate_health_policy_form"
-
-    def validate_name(self,
-                      slot_value:Any,
-                      dispatcher:CollectingDispatcher,
-                      tracker: Tracker,
-                      domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
-
-        name = tracker.get_slot('name').lower()
-        print(f"This is name: {name}")
-        if name.replace(" ", "").isalpha() and len(name) > 1:
-            dispatcher.utter_message(text="Thanks! Now, could you please provide your email?")
-            return {"name": name}
-        else:
-            dispatcher.utter_message(text="Please enter a valid name.")
-            return {"name": None}
-
-    def validate_email(self,
-                       slot_value:Any,
-                      dispatcher:CollectingDispatcher,
-                      tracker: Tracker,
-                      domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
-        
-
-        get_email = tracker.get_slot('email').strip().lower()
-        email = re.sub(r'\s+', '', get_email)
-        print(f"This is email: {email}")
-        if "@" in email and "." in email and len(email) > 7:
-            dispatcher.utter_message(text="Thanks! Now, could you please provide your age?")
-            return {"email": email}
-        else:
-            dispatcher.utter_message(text="Please enter a valid email address.")
-            return {"email": None}
-        
-
-    def validate_age(self,
-                    slot_value:Any,
-                    dispatcher:CollectingDispatcher,
-                    tracker: Tracker,
-                    domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
-
-        age  = tracker.get_slot('age')
-        print(f"This is age: {age}")
-        if age and 0 < int(age) <= 120:
-            dispatcher.utter_message(text="Thanks! Now, could you please provide your Phone Number?") 
-            return {"age": age}
-        else:
-            dispatcher.utter_message(text="Please enter a valid age")
-            return {"age": None}
-
-    def validate_phone_number(self,
-                    slot_value: Any,
-                    dispatcher:CollectingDispatcher,
-                    tracker: Tracker,
-                    domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
-
-        phone_number = tracker.get_slot('phone_number')
-        print(f"This is Phone Number: {phone_number}")
-        if phone_number.isdigit() and len(phone_number) <= 15:
-            dispatcher.utter_message(text="Thanks! Now, could you please provide your Income?") 
-            return {"phone_number": phone_number}
-        else:
-            dispatcher.utter_message(text="Please enter a valid phone number")
-            return {"phone_number": None}
-
-    def validate_income(self,
-                    slot_value:Any,
-                    dispatcher:CollectingDispatcher,
-                    tracker: Tracker,
-                    domain: Dict[Text,Any]) -> List[Dict[Text, Any]]:
-
-        income = tracker.get_slot('income')
-        print(f"This is Income: {income}")
-        try:
-            income_value = float(income)
-            if income_value > 0:
-                return {"income": income}
-            else: 
-                dispatcher.utter_message(text="Please enter a valid income")
-                return {"income": None}
-        except ValueError:
-            dispatcher.utter_message(text="Please enter a valid numeric income.")
-            return {"income": None}
-
-
 class ValidateUserDetailsForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_user_details_form"
@@ -1086,196 +1271,6 @@ class ValidateUserDetailsForm(FormValidationAction):
         except ValueError:
             dispatcher.utter_message(text="Please enter a valid numeric income.")
             return {"income": None}
-
-
-class ActionSubmitEmergencyPincodeForm(Action):
-    def name(self) -> Text:
-        return "action_submit_emergency_support_pincode_form"
-
-    def run(self, dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: "DomainDict") -> List[Dict[Text, Any]]:
-
-        emergency_pincode = tracker.get_slot("pincode")
-        latitude = tracker.get_slot("latitude")
-        longitude = tracker.get_slot("longitude")
-        print("emergency_pincode::::",emergency_pincode)
-
-        if emergency_pincode == "fallback" or (latitude,longitude) == ("fallback","fallback"):
-            message = (
-                "Need help with renewal, claims or any other insurance-related support. \n \n"
-                "Click on *Main Menu*"
-            )
-            buttons = [
-                {"title": "Renew Policy", "payload": '/renew_policy'},
-                {"title": "Claims Related", "payload": '/claims_related'},
-                {"title": "Download Policy Copy", "payload": '/download_policy'},
-                {"title": "Emergengy Support", "payload": '/emergency_support'},
-                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
-                {"title": "New Policy", "payload": '/new_policy'},
-                {"title": "Health Policy", "payload": '/health_policy'},
-                {"title": "User Details", "payload": '/user_details'}
-            ]
-            dispatcher.utter_message(text=message, buttons=buttons)
-            return [
-                SlotSet("pincode", None),
-                SlotSet("latitude", None),
-                SlotSet("longitude", None),
-                SlotSet("failed_attempts", None)
-            ]
-        else:
-            message = (
-                "Great! We found 1 Garage near you. Given below are the details of workshops: \n \n"
-                "*Superon* \n"
-                "Tele No: 9876543211 \n \n"
-                "*Safdarjang* \n"
-                "Tele No: 8765432123 \n \n"
-                "Click the link below to view garages on the map: \n"
-                "https://dxa2.jcowk/oxwo=jcwojcown \n \n"
-                "If you require any assistance, \n \n"
-                "Call - *1800XXXXXXXXX* \n"
-                "Missed call and get a callback: \n"
-                "9876543211"
-            )
-            buttons = [
-                {"title": "Renew Policy", "payload": '/renew_policy'},
-                {"title": "Claims Related", "payload": '/claims_related'},
-                {"title": "Download Policy Copy", "payload": '/download_policy'},
-                {"title": "Emergengy Support", "payload": '/emergency_support'},
-                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
-                {"title": "New Policy", "payload": '/new_policy'},
-                {"title": "Health Policy", "payload": '/health_policy'},
-                {"title": "User Details", "payload": '/user_details'}
-            ]
-            dispatcher.utter_message(text=message, buttons=buttons)
-            return [
-                SlotSet("pincode", None),
-                SlotSet("latitude", None),
-                SlotSet("longitude", None),
-                SlotSet("failed_attempts", None)
-            ]
-
-
-class ActionSubmitNearByWorkshopPincodeForm(Action):
-    def name(self) -> Text:
-        return "action_submit_near_by_workshop_pincode_form"
-    
-    def run(
-            self,
-            dispatcher:CollectingDispatcher,
-            tracker:Tracker,
-            domain: DomainDict) -> List[Dict[Text, Any]]:
-
-        pincode = tracker.get_slot('pincode')
-        latitude = tracker.get_slot('latitude')
-        longitude = tracker.get_slot('longitude')
-        if pincode == "fallback" or (latitude,longitude) == ("fallback","fallback"):
-            message = (
-                "Need help with renewal, claims or any other insurance-related support. \n \n"
-                "Click on *Main Menu*"
-            )
-            buttons = [
-                {"title": "Renew Policy", "payload": '/renew_policy'},
-                {"title": "Claims Related", "payload": '/claims_related'},
-                {"title": "Download Policy Copy", "payload": '/download_policy'},
-                {"title": "Emergengy Support", "payload": '/emergency_support'},
-                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
-                {"title": "New Policy", "payload": '/new_policy'},
-                {"title": "Health Policy", "payload": '/health_policy'},
-                {"title": "User Details", "payload": '/user_details'}
-            ]
-            dispatcher.utter_message(text=message, buttons=buttons)
-            return [
-                SlotSet("pincode", None),
-                SlotSet("latitude", None),
-                SlotSet("longitude", None),
-                SlotSet("failed_attempts", None)
-            ]
-        else:
-            
-            message = (
-                "Great! We found 1 Garage near you. Given below are the details of workshops: \n \n"
-                "*Superon* \n"
-                "Tele No: 9876543211 \n \n"
-                "*Safdarjang* \n"
-                "Tele No : 8765432123 \n \n"
-                "Click the link below to view garages on the map: \n"
-                "https://dxa2.jcowk/oxwo=jcwojcown \n \n"
-                "If you require any assistance, \n \n"
-                "Call - *1800XXXXXXXXX* \n"
-                "Missed call and get a callback: \n"
-                "9876543211"
-            )
-            buttons = [
-                {"title": "Renew Policy", "payload": '/renew_policy'},
-                {"title": "Claims Related", "payload": '/claims_related'},
-                {"title": "Download Policy Copy", "payload": '/download_policy'},
-                {"title": "Emergengy Support", "payload": '/emergency_support'},
-                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
-                {"title": "New Policy", "payload": '/new_policy'},
-                {"title": "Health Policy", "payload": '/health_policy'},
-                {"title": "User Details", "payload": '/user_details'}
-            ]
-            dispatcher.utter_message(text=message, buttons=buttons)
-            return [
-                SlotSet("pincode", None),
-                SlotSet("latitude", None),
-                SlotSet("longitude", None),
-                SlotSet("failed_attempts", None)
-            ]
-
-
-class ActionSubmitHealthPolicyForm(Action):
-    def name(self) -> Text:
-        return "action_submit_health_policy_form"
-    
-    def run(self,
-            dispatcher: CollectingDispatcher,
-            tracker:Tracker,
-            domain:Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        name = tracker.get_slot('name')
-        email = tracker.get_slot('email')
-        age = tracker.get_slot('age')
-        phone_number = tracker.get_slot('phone_number')
-        income = tracker.get_slot('income')
-        
-        payload = {
-            "username": name,
-            "email": email,
-            "age": age,
-            "phone_number": phone_number,
-            "income": income
-        }
-        try:
-            result = create_user(payload)
-            message = (
-                "🔍 Here's the information About you:\n"
-                f"👤 *Username:* {result['username']}\n"
-                f"📧 *Email:* {result['email']}\n"
-                f"🎂 *Age:* {result['age']}\n"
-                f"📞 *Phone Number:* {result['phone_number']}\n"
-                f"💼 *Income:* {result['income']}\n"
-            )
-            buttons = [
-                {"title": "Renew Policy", "payload": '/renew_policy'},
-                {"title": "Claims Related", "payload": '/claims_related'},
-                {"title": "Download Policy Copy", "payload": '/download_policy'},
-                {"title": "Emergengy Support", "payload": '/emergency_support'},
-                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
-                {"title": "New Policy", "payload": '/new_policy'},
-                {"title": "Health Policy", "payload": '/health_policy'},
-                {"title": "User Details", "payload": '/user_details'}
-            ]
-            dispatcher.utter_message(text=message, buttons=buttons)
-        except requests.exceptions.RequestException as e:
-            dispatcher.utter_message(text=f"Failed to submit form: {str(e)}")
-        return [
-            SlotSet('name', None),
-            SlotSet('email', None),
-            SlotSet('age', None),
-            SlotSet('phone_number', None),
-            SlotSet('income', None)
-        ]
 
 
 class ActionSubmitUserDetailsForm(Action):

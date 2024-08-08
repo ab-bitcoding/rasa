@@ -37,6 +37,7 @@ entities:
   - longitude
 
 slots:
+
   language:
     type: text
     influence_conversation: true
@@ -224,22 +225,26 @@ actions:
   - action_greet_user
   - action_select_language
   - action_renew_policy
-  - action_near_by_workshop
+
   - action_emergency_support
-  - action_health_policy
-  - action_user_details
   - validate_emergency_support_pincode_form
-  - validate_near_by_workshop_pincode_form
-  - validate_health_policy_form
-  - validate_user_details_form
   - action_submit_emergency_support_pincode_form
+
+  - action_near_by_workshop
+  - validate_near_by_workshop_pincode_form
   - action_submit_near_by_workshop_pincode_form
+
+  - action_health_policy
+  - validate_health_policy_form
   - action_submit_health_policy_form
-  - action_submit_user_details_form
-  - action_get_all_user
+
   - action_add_user
   - action_update_user_details
   - action_confirm_user_details
+
+  - action_user_details
+  - validate_user_details_form
+  - action_submit_user_details_form
 
   - action_update_email_details
   - validate_update_email_details_form
@@ -257,6 +262,7 @@ actions:
   - validate_update_income_details_form
   - submit_update_income_details_form
 
+  - action_get_all_user
 
 session_config:
   session_expiration_time: 60
