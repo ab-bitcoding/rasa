@@ -476,6 +476,7 @@ class WhatsAppInput(InputChannel):
     """WhatsApp Cloud API input channel"""
 
     user_mobile = None 
+    # location_data = None
 
     @classmethod
     def name(cls) -> Text:
@@ -592,7 +593,7 @@ class WhatsAppInput(InputChannel):
                 longitude = location['longitude']
             logging.info(f"user location: {location}")
             # logger(level="INFO", message=f"user location: {location}")
-            return f"Location of accident is Received with Latitude {latitude} and Longitude is {longitude}"
+            return f"Location of accident is Received with Latitude is {latitude} and Longitude is {longitude}"
         
         elif message_type == "interactive":
             response = self.client.get_interactive_response(data)

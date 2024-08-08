@@ -25,6 +25,12 @@ class ActionGreetUser(Action):
         user_phone_number = metadata.get("sender")
         print(f"greet user_phone_number: {user_phone_number}")
 
+        # location = metadata.get("location")
+        # longitude = metadata.get("longitude")
+
+        # print(f"location: {location}")
+        # print(f"longitude: {longitude}")
+
         if user_phone_number:
             user_data = fetch_user_data(user_phone_number)
             if user_data:
@@ -76,12 +82,8 @@ class ActionConfirmUserDetails(Action):
         user_name = tracker.get_slot("name")
         if phone_number:
             message = (
-                f"Hi *{user_name}*,\n \n"
-                "I am VISoF Buddy, your WhatsApp Insurance Assistant. \n \n" 
-                "Your Hyundai Verna (DL - 3CBU - 6767) Insurance Policy (Policy No: 3423223276548663) is valid until 28 Feb 2024. \n \n"
-                "Let's get started with your renewal, claims, or any other insurance-related support you might need. Feel free to reach out for assistance! \n \n"
-                "Best regards,\n"
-                "VISoF Buddy Team"
+                "Need help with renewal, claims or any other insurance-related support. \n \n"
+                "Click on *Main Menu*"
             )
             buttons = [
                 {"title": "Renew Policy", "payload": '/renew_policy'},
@@ -137,34 +139,6 @@ class ActionSelectLanguage(Action):
 
             dispatcher.utter_message(text=message,buttons=buttons)
             return [SlotSet("language", normalized_language)]
-
-
-class ActionMenuList(Action):
-    def name(self) -> Text:
-        return "action_menu_list"
-    
-    def run(self,
-            dispatcher:CollectingDispatcher,
-            tracker: Tracker,
-            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-            message = (
-                "Need help with renewal, claims, or any other insurance-related support. \n \n"
-                "Click on *Main Menu*"
-            )
-            buttons = [
-                {"title": "Renew Policy", "payload": '/renew_policy'},
-                {"title": "Claims Related", "payload": '/claims_related'},
-                {"title": "Download Policy Copy", "payload": '/download_policy'},
-                {"title": "Emergengy Support", "payload": '/emergency_support'},
-                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
-                {"title": "New Policy", "payload": '/new_policy'},
-                {"title": "Health Policy", "payload": '/health_policy'},
-                {"title": "User Details", "payload": '/user_details'}
-            ]
-
-            dispatcher.utter_message(text=message, buttons=buttons)
-
-            return []
 
 
 class ActionEmergencySupport(Action):
@@ -853,7 +827,7 @@ class ValidateEmergencySupportPincodeForm(FormValidationAction):
             return {"pincode": None}
 
 
-class ValidaeNearByWorkshopPincodeForm(FormValidationAction):
+class ValidateNearByWorkshopPincodeForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_near_by_workshop_pincode_form"
     
@@ -863,18 +837,34 @@ class ValidaeNearByWorkshopPincodeForm(FormValidationAction):
             dispatcher: CollectingDispatcher,
             tracker:Tracker,
             domain:Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        near_by_workshop_pincode_value = str(slot_value)
 
-        if len(near_by_workshop_pincode_value) == 6 and near_by_workshop_pincode_value.isdigit():
-            return {"pincode": near_by_workshop_pincode_value}
+        pincode = tracker.get_slot('pincode')
+        latitude = tracker.get_slot('latitude')
+        longitude = tracker.get_slot('longitude')
+
+        if (latitude and longitude) is not None:
+            if -180 <= float(latitude) <= 180 and -180 <= float(longitude) <= 180:
+                print("Inside match if Condition")
+                set_latitude_and_longitude_slot = {"latitude": latitude, "longitude": longitude}
+                print(f"set_latitude_and_longitude_slot: {set_latitude_and_longitude_slot}")
+                return set_latitude_and_longitude_slot
+            else:
+                dispatcher.utter_message(text="The provided location coordinates are invalid.")
+                return {"latitude": None, "longitude": None, "pincode": None}
         else:
-            message = (
-                "Looks like the location is invalid. \n \n"
-                "Please enter the pincode or share your current location" 
-            )
-            dispatcher.utter_message(text=message)
-            return {"pincode": None}
+            if pincode and len(pincode) == 6 and pincode.isdigit():
+                print("Inside Validate pincode if Condition")
 
+                set_pincode_slot = {"pincode": pincode}
+                print(f"set_pincode_slot: {set_pincode_slot}")
+                return set_pincode_slot
+            else:
+                print("Inside Validate pincode else Condition")
+                dispatcher.utter_message(text="Looks like the pincode is invalid. Please enter a valid 6-digit pincode or share your current location.")
+                set_pincode_slot = {"pincode": None} 
+                print(f"set_pincode_slot: {set_pincode_slot}") 
+                return set_pincode_slot
+            
 
 class ValidateHealthPolicyForm(FormValidationAction):
     def name(self) -> Text:
@@ -1102,40 +1092,36 @@ class ActionSubmitNearByWorkshopPincodeForm(Action):
             dispatcher:CollectingDispatcher,
             tracker:Tracker,
             domain: "DomainDict") -> List[Dict[Text, Any]]:
-        near_by_workshop_pincode = tracker.get_slot("pincode")
-        if near_by_workshop_pincode:
-            message = (
-                "Great! We found 1 Garage near you. Given below are the details of workshops: \n \n"
-                "*Superon* \n"
-                "Tele No: 9876543211 \n \n"
-                "*Safdarjang* \n"
-                "Tele No : 8765432123 \n \n"
-                "Click the link below to view garages on the map: \n"
-                "https://dxa2.jcowk/oxwo=jcwojcown \n \n"
-                "If you require any assistance, \n \n"
-                "Call - *1800XXXXXXXXX* \n"
-                "Missed call and get a callback: \n"
-                "9876543211"
-            )
-            buttons = [
-                {"title": "Renew Policy", "payload": '/renew_policy'},
-                {"title": "Claims Related", "payload": '/claims_related'},
-                {"title": "Download Policy Copy", "payload": '/download_policy'},
-                {"title": "Emergengy Support", "payload": '/emergency_support'},
-                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
-                {"title": "New Policy", "payload": '/new_policy'},
-                {"title": "Health Policy", "payload": '/health_policy'},
-                {"title": "User Details", "payload": '/user_details'}
-            ]
-            dispatcher.utter_message(text=message, buttons=buttons)
-        else:
-            message = ("""
-                Looks like the location is invalid.
 
-                Please enter the pincode or share your current location 
-            """)
-            dispatcher.utter_message(text=message)
-        return [SlotSet("pincode", None)]
+        message = (
+            "Great! We found 1 Garage near you. Given below are the details of workshops: \n \n"
+            "*Superon* \n"
+            "Tele No: 9876543211 \n \n"
+            "*Safdarjang* \n"
+            "Tele No : 8765432123 \n \n"
+            "Click the link below to view garages on the map: \n"
+            "https://dxa2.jcowk/oxwo=jcwojcown \n \n"
+            "If you require any assistance, \n \n"
+            "Call - *1800XXXXXXXXX* \n"
+            "Missed call and get a callback: \n"
+            "9876543211"
+        )
+        buttons = [
+            {"title": "Renew Policy", "payload": '/renew_policy'},
+            {"title": "Claims Related", "payload": '/claims_related'},
+            {"title": "Download Policy Copy", "payload": '/download_policy'},
+            {"title": "Emergengy Support", "payload": '/emergency_support'},
+            {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+            {"title": "New Policy", "payload": '/new_policy'},
+            {"title": "Health Policy", "payload": '/health_policy'},
+            {"title": "User Details", "payload": '/user_details'}
+        ]
+        dispatcher.utter_message(text=message, buttons=buttons)
+        return [
+            SlotSet("pincode", None),
+            SlotSet("latitude", None),
+            SlotSet("longitude", None)
+        ]
 
 
 class ActionSubmitHealthPolicyForm(Action):

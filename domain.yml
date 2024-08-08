@@ -16,6 +16,7 @@ intents:
   - get_all_user
   - near_by_workshop
   - health_policy
+  - provide_location
   - goodbye
 
 entities:
@@ -32,6 +33,8 @@ entities:
   - update_phone_number
   - update_income
   - failed_attempts
+  - latitude
+  - longitude
 
 slots:
   language:
@@ -152,6 +155,20 @@ slots:
     - type: from_entity
       entity: failed_attempts
 
+  latitude:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: latitude
+
+  longitude:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: longitude
+
 forms:
   emergency_support_pincode_form:
     required_slots:
@@ -192,10 +209,6 @@ forms:
   update_income_details_form:
     required_slots:
       - update_income
-
-  # update_phone_number_details_form:
-  #   required_slots:
-  #     - update_phone_number
 
 responses:
   utter_greet:

@@ -74,6 +74,21 @@ nlu:
     - Find a workshop near me.
     - I need a workshop nearby.
 
+- intent: provide_location
+  examples: |
+    - Location of accident is Received with Latitude is [34.052235123456](latitude) and Longitude is [-118.243683123456](longitude)
+    - Location of accident is Received with Latitude is [51.507351234567](latitude) and Longitude is [-0.127758345678](longitude)
+    - Location of accident is Received with Latitude is [35.689487456789](latitude) and Longitude is [139.691711567890](longitude)
+    - Location of accident is Received with Latitude is [-33.868820678901](latitude) and Longitude is [151.209290789012](longitude)
+    - Location of accident is Received with Latitude is [40.712776890123](latitude) and Longitude is [-74.005974901234](longitude)
+    - Location of accident is Received with Latitude is [-23.550520012345](latitude) and Longitude is [-46.633308123456](longitude)
+    - Location of accident is Received with Latitude is [48.856613234567](latitude) and Longitude is [2.352222345678](longitude)
+    - Location of accident is Received with Latitude is [52.520008456789](latitude) and Longitude is [13.404954567890](longitude)
+    - Location of accident is Received with Latitude is [19.432608678901](latitude) and Longitude is [-99.133209789012](longitude)
+    - Location of accident is Received with Latitude is [55.755825890123](latitude) and Longitude is [37.617298901234](longitude)
+    - Location of accident is Received with Latitude is [-34.603722012345](latitude) and Longitude is [-58.381592123456](longitude)
+    - Location of accident is Received with Latitude is [39.904202234567](latitude) and Longitude is [116.407394345678](longitude)
+
 - intent: renew_policy
   examples: |
     - I need Renew Policy
