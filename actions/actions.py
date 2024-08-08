@@ -813,18 +813,51 @@ class ValidateEmergencySupportPincodeForm(FormValidationAction):
         tracker: Tracker,
         domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
-        print("Emergency Validation Function Running")
-        emergency_pincode = str(slot_value)
+        emergency_pincode = tracker.get_slot('pincode')
+        latitude = tracker.get_slot('latitude')
+        longitude = tracker.get_slot('longitude')
+
         print(f"emergency_pincode: {emergency_pincode}")
-        if len(emergency_pincode) == 6 and emergency_pincode.isdigit():
-            return {"pincode": emergency_pincode}
+        print(f"latitude: {latitude}")
+        print(f"longitude: {longitude}")
+
+        failed_attempts = tracker.get_slot('failed_attempts') or 0
+
+        if None not in (latitude, longitude):
+            if -180 <= float(latitude) <= 180 and -180 <= float(longitude) <= 180:
+                print("Inside match if Condition")
+                set_latitude_and_longitude_slot = {"latitude": latitude, "longitude": longitude}
+                print(f"set_latitude_and_longitude_slot: {set_latitude_and_longitude_slot}")
+                return set_latitude_and_longitude_slot
+            else:
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_update_latitude_longitude = {"latitude" :"fallback","longitude" :"fallback","failed_attempts": None}
+                    print(f"get_update_latitude_longitude: {get_update_latitude_longitude}")
+                    return get_update_latitude_longitude
+                else:
+                    dispatcher.utter_message(text="The provided location coordinates are invalid.")
+                    attemps_value = {"failed_attempts": failed_attempts,"latitude": None, "longitude": None, "pincode": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
         else:
-            message = (
-                "Looks like the location is invalid. \n \n"
-                "Please enter the pincode or share your current location." 
-            )
-            dispatcher.utter_message(text=message)
-            return {"pincode": None}
+            if emergency_pincode and len(emergency_pincode) == 6 and emergency_pincode.isdigit():
+                print("Inside Validate pincode if Condition")
+
+                set_pincode_slot = {"pincode": emergency_pincode}
+                print(f"set_pincode_slot: {set_pincode_slot}")
+                return set_pincode_slot
+            else:
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_pincode = {"pincode" :"fallback", "failed_attempts": None}
+                    print(f"get_pincode: {get_pincode}")
+                    return get_pincode
+                else:
+                    dispatcher.utter_message(text="Looks like the pincode is invalid. Please enter a valid 6-digit pincode or share your current location.")
+                    attemps_value = {"failed_attempts": failed_attempts, "pincode": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
 
 
 class ValidateNearByWorkshopPincodeForm(FormValidationAction):
@@ -844,7 +877,7 @@ class ValidateNearByWorkshopPincodeForm(FormValidationAction):
         failed_attempts = tracker.get_slot('failed_attempts') or 0
 
 
-        if (latitude and longitude) is not None:
+        if None not in (latitude, longitude):
             if -180 <= float(latitude) <= 180 and -180 <= float(longitude) <= 180:
                 print("Inside match if Condition")
                 set_latitude_and_longitude_slot = {"latitude": latitude, "longitude": longitude}
@@ -1062,9 +1095,35 @@ class ActionSubmitEmergencyPincodeForm(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: "DomainDict") -> List[Dict[Text, Any]]:
+
         emergency_pincode = tracker.get_slot("pincode")
+        latitude = tracker.get_slot("latitude")
+        longitude = tracker.get_slot("longitude")
         print("emergency_pincode::::",emergency_pincode)
-        if emergency_pincode:
+
+        if emergency_pincode == "fallback" or (latitude,longitude) == ("fallback","fallback"):
+            message = (
+                "Need help with renewal, claims or any other insurance-related support. \n \n"
+                "Click on *Main Menu*"
+            )
+            buttons = [
+                {"title": "Renew Policy", "payload": '/renew_policy'},
+                {"title": "Claims Related", "payload": '/claims_related'},
+                {"title": "Download Policy Copy", "payload": '/download_policy'},
+                {"title": "Emergengy Support", "payload": '/emergency_support'},
+                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+                {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'},
+                {"title": "User Details", "payload": '/user_details'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
+            return [
+                SlotSet("pincode", None),
+                SlotSet("latitude", None),
+                SlotSet("longitude", None),
+                SlotSet("failed_attempts", None)
+            ]
+        else:
             message = (
                 "Great! We found 1 Garage near you. Given below are the details of workshops: \n \n"
                 "*Superon* \n"
@@ -1089,14 +1148,12 @@ class ActionSubmitEmergencyPincodeForm(Action):
                 {"title": "User Details", "payload": '/user_details'}
             ]
             dispatcher.utter_message(text=message, buttons=buttons)
-        else:
-            message = ( 
-                "Looks like the location is invalid.\n"
-                "Please enter the pincode or share your current location" 
-            )
-            dispatcher.utter_message(text=message)
-
-        return [SlotSet("pincode", None)]
+            return [
+                SlotSet("pincode", None),
+                SlotSet("latitude", None),
+                SlotSet("longitude", None),
+                SlotSet("failed_attempts", None)
+            ]
 
 
 class ActionSubmitNearByWorkshopPincodeForm(Action):
@@ -1131,7 +1188,8 @@ class ActionSubmitNearByWorkshopPincodeForm(Action):
             return [
                 SlotSet("pincode", None),
                 SlotSet("latitude", None),
-                SlotSet("longitude", None)
+                SlotSet("longitude", None),
+                SlotSet("failed_attempts", None)
             ]
         else:
             
@@ -1162,7 +1220,8 @@ class ActionSubmitNearByWorkshopPincodeForm(Action):
             return [
                 SlotSet("pincode", None),
                 SlotSet("latitude", None),
-                SlotSet("longitude", None)
+                SlotSet("longitude", None),
+                SlotSet("failed_attempts", None)
             ]
 
 
