@@ -7,8 +7,6 @@ stories:
     - intent: renew_policy
     - action: action_renew_policy
 
-
-
 - story: Get All User Details
   steps:
     - intent: get_all_user

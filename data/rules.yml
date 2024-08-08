@@ -22,16 +22,6 @@ rules:
     - intent: select_language
     - action: action_select_language
 
-- rule: Confirm User Data
-  steps:
-    - intent: confirm_user_details
-    - action: action_confirm_user_details
-
-- rule: Update User Details
-  steps:
-    - intent: update_user_details
-    - action: action_update_user_details
-
 - rule: Activate Emergency Pincode form
   steps:
   - intent: emergency_support
@@ -83,6 +73,16 @@ rules:
       - requested_slot: null
     - action: action_submit_health_policy_form
 
+- rule: Update User Details
+  steps:
+    - intent: update_user_details
+    - action: action_update_user_details
+
+- rule: Confirm User Data
+  steps:
+    - intent: confirm_user_details
+    - action: action_confirm_user_details
+
 - rule: Activate Add User Details form
   steps:
     - intent: add_user
@@ -100,23 +100,6 @@ rules:
       - requested_slot: null
     - action: action_submit_user_details_form
 
-- rule: Activate Update Email form
-  steps:
-    - intent: update_email_details
-    - action: action_update_email_details
-    - action: update_email_details_form
-    - active_loop: update_email_details_form
-
-- rule: Submit Update Email form
-  condition:
-    - active_loop: update_email_details_form
-  steps:
-    - action: update_email_details_form
-    - active_loop: null
-    - slot_was_set:
-      - requested_slot: null
-    - action: submit_update_email_details_form
-
 - rule: Activate Update Username From
   steps:
     - intent: update_username_details
@@ -133,6 +116,23 @@ rules:
     - slot_was_set:
       - requested_slot: null
     - action: submit_update_username_details_form
+
+- rule: Activate Update Email form
+  steps:
+    - intent: update_email_details
+    - action: action_update_email_details
+    - action: update_email_details_form
+    - active_loop: update_email_details_form
+
+- rule: Submit Update Email form
+  condition:
+    - active_loop: update_email_details_form
+  steps:
+    - action: update_email_details_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - action: submit_update_email_details_form
 
 - rule: Activate Update Age From
   steps:
