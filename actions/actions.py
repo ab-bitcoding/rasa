@@ -841,6 +841,8 @@ class ValidateNearByWorkshopPincodeForm(FormValidationAction):
         pincode = tracker.get_slot('pincode')
         latitude = tracker.get_slot('latitude')
         longitude = tracker.get_slot('longitude')
+        failed_attempts = tracker.get_slot('failed_attempts') or 0
+
 
         if (latitude and longitude) is not None:
             if -180 <= float(latitude) <= 180 and -180 <= float(longitude) <= 180:
@@ -849,8 +851,16 @@ class ValidateNearByWorkshopPincodeForm(FormValidationAction):
                 print(f"set_latitude_and_longitude_slot: {set_latitude_and_longitude_slot}")
                 return set_latitude_and_longitude_slot
             else:
-                dispatcher.utter_message(text="The provided location coordinates are invalid.")
-                return {"latitude": None, "longitude": None, "pincode": None}
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_update_latitude_longitude = {"latitude" :"fallback","longitude" :"fallback","failed_attempts": None}
+                    print(f"get_update_latitude_longitude: {get_update_latitude_longitude}")
+                    return get_update_latitude_longitude
+                else:
+                    dispatcher.utter_message(text="The provided location coordinates are invalid.")
+                    attemps_value = {"failed_attempts": failed_attempts,"latitude": None, "longitude": None, "pincode": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
         else:
             if pincode and len(pincode) == 6 and pincode.isdigit():
                 print("Inside Validate pincode if Condition")
@@ -859,11 +869,17 @@ class ValidateNearByWorkshopPincodeForm(FormValidationAction):
                 print(f"set_pincode_slot: {set_pincode_slot}")
                 return set_pincode_slot
             else:
-                print("Inside Validate pincode else Condition")
-                dispatcher.utter_message(text="Looks like the pincode is invalid. Please enter a valid 6-digit pincode or share your current location.")
-                set_pincode_slot = {"pincode": None} 
-                print(f"set_pincode_slot: {set_pincode_slot}") 
-                return set_pincode_slot
+                failed_attempts = failed_attempts + 1
+                if failed_attempts == 3:
+                    get_pincode = {"pincode" :"fallback", "failed_attempts": None}
+                    print(f"get_pincode: {get_pincode}")
+                    return get_pincode
+                else:
+                    dispatcher.utter_message(text="Looks like the pincode is invalid. Please enter a valid 6-digit pincode or share your current location.")
+                    attemps_value = {"failed_attempts": failed_attempts, "pincode": None}
+                    print(f"failed_attemps_value: {attemps_value}")
+                    return attemps_value
+
             
 
 class ValidateHealthPolicyForm(FormValidationAction):
@@ -1091,37 +1107,63 @@ class ActionSubmitNearByWorkshopPincodeForm(Action):
             self,
             dispatcher:CollectingDispatcher,
             tracker:Tracker,
-            domain: "DomainDict") -> List[Dict[Text, Any]]:
+            domain: DomainDict) -> List[Dict[Text, Any]]:
 
-        message = (
-            "Great! We found 1 Garage near you. Given below are the details of workshops: \n \n"
-            "*Superon* \n"
-            "Tele No: 9876543211 \n \n"
-            "*Safdarjang* \n"
-            "Tele No : 8765432123 \n \n"
-            "Click the link below to view garages on the map: \n"
-            "https://dxa2.jcowk/oxwo=jcwojcown \n \n"
-            "If you require any assistance, \n \n"
-            "Call - *1800XXXXXXXXX* \n"
-            "Missed call and get a callback: \n"
-            "9876543211"
-        )
-        buttons = [
-            {"title": "Renew Policy", "payload": '/renew_policy'},
-            {"title": "Claims Related", "payload": '/claims_related'},
-            {"title": "Download Policy Copy", "payload": '/download_policy'},
-            {"title": "Emergengy Support", "payload": '/emergency_support'},
-            {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
-            {"title": "New Policy", "payload": '/new_policy'},
-            {"title": "Health Policy", "payload": '/health_policy'},
-            {"title": "User Details", "payload": '/user_details'}
-        ]
-        dispatcher.utter_message(text=message, buttons=buttons)
-        return [
-            SlotSet("pincode", None),
-            SlotSet("latitude", None),
-            SlotSet("longitude", None)
-        ]
+        pincode = tracker.get_slot('pincode')
+        latitude = tracker.get_slot('latitude')
+        longitude = tracker.get_slot('longitude')
+        if pincode == "fallback" or (latitude,longitude) == ("fallback","fallback"):
+            message = (
+                "Need help with renewal, claims or any other insurance-related support. \n \n"
+                "Click on *Main Menu*"
+            )
+            buttons = [
+                {"title": "Renew Policy", "payload": '/renew_policy'},
+                {"title": "Claims Related", "payload": '/claims_related'},
+                {"title": "Download Policy Copy", "payload": '/download_policy'},
+                {"title": "Emergengy Support", "payload": '/emergency_support'},
+                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+                {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'},
+                {"title": "User Details", "payload": '/user_details'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
+            return [
+                SlotSet("pincode", None),
+                SlotSet("latitude", None),
+                SlotSet("longitude", None)
+            ]
+        else:
+            
+            message = (
+                "Great! We found 1 Garage near you. Given below are the details of workshops: \n \n"
+                "*Superon* \n"
+                "Tele No: 9876543211 \n \n"
+                "*Safdarjang* \n"
+                "Tele No : 8765432123 \n \n"
+                "Click the link below to view garages on the map: \n"
+                "https://dxa2.jcowk/oxwo=jcwojcown \n \n"
+                "If you require any assistance, \n \n"
+                "Call - *1800XXXXXXXXX* \n"
+                "Missed call and get a callback: \n"
+                "9876543211"
+            )
+            buttons = [
+                {"title": "Renew Policy", "payload": '/renew_policy'},
+                {"title": "Claims Related", "payload": '/claims_related'},
+                {"title": "Download Policy Copy", "payload": '/download_policy'},
+                {"title": "Emergengy Support", "payload": '/emergency_support'},
+                {"title": "Nearly Workshop", "payload": '/near_by_workshop'},
+                {"title": "New Policy", "payload": '/new_policy'},
+                {"title": "Health Policy", "payload": '/health_policy'},
+                {"title": "User Details", "payload": '/user_details'}
+            ]
+            dispatcher.utter_message(text=message, buttons=buttons)
+            return [
+                SlotSet("pincode", None),
+                SlotSet("latitude", None),
+                SlotSet("longitude", None)
+            ]
 
 
 class ActionSubmitHealthPolicyForm(Action):
